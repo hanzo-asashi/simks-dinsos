@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 // use Illuminate\Support\Facades\Gate;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 
 class AuthServiceProvider extends ServiceProvider
@@ -13,7 +14,7 @@ class AuthServiceProvider extends ServiceProvider
      * @var array<class-string, class-string>
      */
     protected $policies = [
-        //
+        'Spatie\Permission\Models\Role' => 'App\Policies\RolePolicy',
     ];
 
     /**
@@ -21,6 +22,8 @@ class AuthServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        Model::preventsAccessingMissingAttributes(!$this->app->environment('production'));
+        Model::unguard();
+        Model::preventsLazyLoading(!$this->app->environment('production'));
     }
 }

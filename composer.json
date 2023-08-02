@@ -2,14 +2,31 @@
     "name": "laravel/laravel",
     "type": "project",
     "description": "The skeleton application for the Laravel framework.",
-    "keywords": ["laravel", "framework"],
+    "keywords": [
+        "laravel",
+        "framework"
+    ],
     "license": "MIT",
     "require": {
         "php": "^8.1",
+        "awcodes/filament-badgeable-column": "^2.0",
+        "awcodes/filament-curator": "^3.0@beta",
+        "awcodes/filament-quick-create": "^3.0",
+        "awcodes/filament-sticky-header": "^2.0",
+        "awcodes/filament-table-repeater": "^2.0",
+        "awcodes/filament-versions": "^2.0",
+        "awcodes/shout": "^2.0",
+        "bezhansalleh/filament-exceptions": "^2.0",
+        "bezhansalleh/filament-shield": "^3.0@beta",
+        "filament/filament": "^3.0.0-beta27",
+        "filament/spatie-laravel-settings-plugin": "3.0-stable",
         "guzzlehttp/guzzle": "^7.2",
+        "jeffgreco13/filament-breezy": "^2.0",
+        "kodepandai/laravel-indonesia": "^2.0",
         "laravel/framework": "^10.10",
         "laravel/sanctum": "^3.2",
-        "laravel/tinker": "^2.8"
+        "laravel/tinker": "^2.8",
+        "leandrocfe/filament-apex-charts": "3.0"
     },
     "require-dev": {
         "fakerphp/faker": "^1.9.1",
@@ -17,6 +34,7 @@
         "laravel/sail": "^1.18",
         "mockery/mockery": "^1.4.4",
         "nunomaduro/collision": "^7.0",
+        "pestphp/pest": "^2.11",
         "spatie/laravel-ignition": "^2.0"
     },
     "autoload": {
@@ -34,10 +52,12 @@
     "scripts": {
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
-            "@php artisan package:discover --ansi"
+            "@php artisan package:discover --ansi",
+            "@php artisan filament:upgrade"
         ],
         "post-update-cmd": [
-            "@php artisan vendor:publish --tag=laravel-assets --ansi --force"
+            "@php artisan vendor:publish --tag=laravel-assets --ansi --force",
+            "@php artisan filament:upgrade"
         ],
         "post-root-package-install": [
             "@php -r \"file_exists('.env') || copy('.env.example', '.env');\""
@@ -60,6 +80,6 @@
             "php-http/discovery": true
         }
     },
-    "minimum-stability": "stable",
+    "minimum-stability": "dev",
     "prefer-stable": true
 }
