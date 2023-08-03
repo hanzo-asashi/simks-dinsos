@@ -3,9 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\FamilyResource\Pages;
-use App\Filament\Resources\FamilyResource\RelationManagers;
 use App\Models\Family;
-use Filament\Forms;
 use Filament\Forms\Components\Card;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -20,12 +18,19 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 use KodePandai\Indonesia\Models\City;
 use KodePandai\Indonesia\Models\District;
 use KodePandai\Indonesia\Models\Village;
+use Str;
 
 class FamilyResource extends Resource
 {
     protected static ?string $model = Family::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $label = 'Keluarga';
+
+    protected static ?string $pluralLabel = 'Keluarga';
+
+    protected static ?string $navigationIcon = 'heroicon-o-home-modern';
+
+    protected static ?string $recordTitleAttribute = 'nama';
 
     public static function form(Form $form): Form
     {
@@ -34,7 +39,7 @@ class FamilyResource extends Resource
                 Card::make([
                     TextInput::make('dtks_id')
                         ->maxLength(36)
-                        ->default(\Str::orderedUuid()),
+                        ->default(Str::orderedUuid()),
 
                     TextInput::make('nik')
                         ->maxLength(16)
@@ -59,10 +64,10 @@ class FamilyResource extends Resource
                     Select::make('kabupaten')
                         ->nullable()
                         ->options(
-                            City::where('province_code', config('default.kodeprov'))
+                            City::where('province_code', config('custom.default.kodeprov'))
                                 ->pluck('name', 'code')
                         )
-                        ->afterStateUpdated(fn(callable $set) => $set('kecamatan', null))
+                        ->afterStateUpdated(fn (callable $set) => $set('kecamatan', null))
                         ->reactive()
                         ->searchable(),
 
@@ -72,29 +77,30 @@ class FamilyResource extends Resource
                         ->reactive()
                         ->options(function (callable $get) {
                             $kab = District::query()->where('city_code', $get('kabupaten'));
-                            if (!$kab) {
-                                return District::where('city_code', config('default.kodepkab'))
+                            if (! $kab) {
+                                return District::where('city_code', config('custom.default.kodekab'))
                                     ->pluck('name', 'code');
                             }
 
                             return $kab->pluck('name', 'code');
                         })
-                        ->hidden(fn(callable $get) => !$get('kabupaten'))
-                        ->afterStateUpdated(fn(callable $set) => $set('kelurahan', null)),
+                        ->hidden(fn (callable $get) => ! $get('kabupaten'))
+                        ->afterStateUpdated(fn (callable $set) => $set('kelurahan', null)),
 
                     Select::make('kelurahan')
                         ->nullable()
                         ->options(function (callable $get) {
                             $kel = Village::query()->where('district_code', $get('kecamatan'));
-                            if (!$kel) {
+                            if (! $kel) {
                                 return Village::where('district_code', '731211')
                                     ->pluck('name', 'code');
                             }
+
                             return $kel->pluck('name', 'code');
                         })
                         ->reactive()
                         ->searchable()
-                        ->hidden(fn(callable $get) => !$get('kecamatan'))
+                        ->hidden(fn (callable $get) => ! $get('kecamatan'))
                         ->afterStateUpdated(function (callable $set, $state) {
                             $village = Village::where('code', $state)->first();
                             if ($village) {
@@ -123,7 +129,7 @@ class FamilyResource extends Resource
                         ->required()
                         ->options([
                             1 => 'Aktif',
-                            0 => 'Non Aktif'
+                            0 => 'Non Aktif',
                         ]),
                 ])->columns(2),
             ]);

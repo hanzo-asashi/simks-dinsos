@@ -16,6 +16,9 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 class JenisBansosResource extends Resource
 {
     protected static ?string $model = JenisBansos::class;
+    protected static ?string $label = 'Jenis Bansos';
+    protected static ?string $pluralLabel = 'Jenis Bansos';
+    protected static ?string $recordTitleAttribute = 'nama';
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 

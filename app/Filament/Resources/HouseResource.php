@@ -3,10 +3,8 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\HouseResource\Pages;
-use App\Filament\Resources\HouseResource\RelationManagers;
 use App\Models\House;
 use Cheesegrits\FilamentGoogleMaps\Fields\Geocomplete;
-use Filament\Forms;
 use Filament\Forms\Components\Card;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Grid;
@@ -16,8 +14,6 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 use KodePandai\Indonesia\Models\City;
 use KodePandai\Indonesia\Models\District;
 use KodePandai\Indonesia\Models\Village;
@@ -26,7 +22,11 @@ class HouseResource extends Resource
 {
     protected static ?string $model = House::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $label = 'Rumah';
+
+    protected static ?string $pluralLabel = 'Rumah';
+
+    protected static ?string $navigationIcon = 'heroicon-o-home-modern';
 
     public static function form(Form $form): Form
     {
@@ -71,22 +71,22 @@ class HouseResource extends Resource
                             ->image()
                             ->maxSize(2048),
 
-//                        Geocomplete::make('alamat')
-//                            ->placeField('location')
-//                            ->isLocation()
-//                            ->reverseGeocode([
-//                                'city' => '%L',
-//                                'zip' => '%z',
-//                                'state' => '%A1',
-//                                'street' => '%n %S',
-//                            ])
-//                            ->countries(['id']) // restrict autocomplete results to these countries
-////                    ->debug() // output the results of reverse geocoding in the browser console, useful for figuring out symbol formats
-//                            ->updateLatLng() // update the lat/lng fields on your form when a Place is selected
-//                            ->maxLength(1024)
-//                            ->placeholder('Mulai ketik alamat ...')
-//                            ->geolocate() // add a suffix button which requests and reverse geocodes the device location
-//                            ->geolocateIcon('heroicon-o-map'), // override the default icon for the geolocate button
+                        //                        Geocomplete::make('alamat')
+                        //                            ->placeField('location')
+                        //                            ->isLocation()
+                        //                            ->reverseGeocode([
+                        //                                'city' => '%L',
+                        //                                'zip' => '%z',
+                        //                                'state' => '%A1',
+                        //                                'street' => '%n %S',
+                        //                            ])
+                        //                            ->countries(['id']) // restrict autocomplete results to these countries
+                        ////                    ->debug() // output the results of reverse geocoding in the browser console, useful for figuring out symbol formats
+                        //                            ->updateLatLng() // update the lat/lng fields on your form when a Place is selected
+                        //                            ->maxLength(1024)
+                        //                            ->placeholder('Mulai ketik alamat ...')
+                        //                            ->geolocate() // add a suffix button which requests and reverse geocodes the device location
+                        //                            ->geolocateIcon('heroicon-o-map'), // override the default icon for the geolocate button
 
                         TextInput::make('no_rumah')
                             ->integer(),
@@ -100,10 +100,10 @@ class HouseResource extends Resource
                         Select::make('kabupaten')
                             ->nullable()
                             ->options(
-                                City::where('province_code', config('default.kodeprov'))
+                                City::where('province_code', config('custom.default.kodeprov'))
                                     ->pluck('name', 'code')
                             )
-                            ->afterStateUpdated(fn(callable $set) => $set('kecamatan', null))
+                            ->afterStateUpdated(fn (callable $set) => $set('kecamatan', null))
                             ->reactive()
                             ->searchable(),
 
@@ -113,23 +113,24 @@ class HouseResource extends Resource
                             ->reactive()
                             ->options(function (callable $get) {
                                 $kab = District::query()->where('city_code', $get('kabupaten'));
-                                if (!$kab) {
-                                    return District::where('city_code', config('default.kodekab'))
+                                if (! $kab) {
+                                    return District::where('city_code', config('custom.default.kodekab'))
                                         ->pluck('name', 'code');
                                 }
 
                                 return $kab->pluck('name', 'code');
                             })
-                            ->afterStateUpdated(fn(callable $set) => $set('kelurahan', null)),
+                            ->afterStateUpdated(fn (callable $set) => $set('kelurahan', null)),
 
                         Select::make('kelurahan')
                             ->nullable()
                             ->options(function (callable $get) {
                                 $kel = Village::query()->where('district_code', $get('kecamatan'));
-                                if (!$kel) {
+                                if (! $kel) {
                                     return Village::where('district_code', '731211')
                                         ->pluck('name', 'code');
                                 }
+
                                 return $kel->pluck('name', 'code');
                             })
                             ->reactive()
@@ -140,8 +141,8 @@ class HouseResource extends Resource
                                     $set('latitude', $village['latitude']);
                                     $set('longitude', $village['longitude']);
                                     $set('location', [
-                                        'lat' => (float)$village['latitude'],
-                                        'lng' => (float)$village['longitude'],
+                                        'lat' => (float) $village['latitude'],
+                                        'lng' => (float) $village['longitude'],
                                     ]);
                                 }
                             }),
@@ -149,13 +150,12 @@ class HouseResource extends Resource
                         TextInput::make('kodepos')
                             ->default(config('default.kodepos')),
 
-
                         TextInput::make('latitude')
                             ->reactive()
                             ->afterStateUpdated(function ($state, callable $get, callable $set) {
                                 $set('location', [
-                                    'lat' => (float)$state,
-                                    'lng' => (float)$get('longitude'),
+                                    'lat' => (float) $state,
+                                    'lng' => (float) $get('longitude'),
                                 ]);
                             })
                             ->lazy(), // important to use lazy, to avoid updates as you type
@@ -163,8 +163,8 @@ class HouseResource extends Resource
                             ->reactive()
                             ->afterStateUpdated(function ($state, callable $get, callable $set) {
                                 $set('location', [
-                                    'lat' => (float)$get('latitude'),
-                                    'lng' => (float)$state,
+                                    'lat' => (float) $get('latitude'),
+                                    'lng' => (float) $state,
                                 ]);
                             })
                             ->lazy(), // important to use lazy, to avoid updates as you type
@@ -172,13 +172,13 @@ class HouseResource extends Resource
                         Select::make('status')
                             ->options([
                                 1 => 'Aktif',
-                                0 => 'Non Aktif'
+                                0 => 'Non Aktif',
                             ])->default(1),
 
                         TextInput::make('keterangan')
                             ->nullable()
                             ->rules(['max:255']),
-                    ])
+                    ]),
                 ]),
             ]);
     }

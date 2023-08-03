@@ -3,9 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\RastraResource\Pages;
-use App\Filament\Resources\RastraResource\RelationManagers;
 use App\Models\Rastra;
-use Filament\Forms;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
@@ -27,8 +25,11 @@ class RastraResource extends Resource
     protected static ?string $model = Rastra::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+
     protected static ?string $slug = 'rastra';
+
     protected static ?string $label = 'Rastra';
+
     protected static ?string $pluralLabel = 'Rastra';
 
     protected static ?string $recordTitleAttribute = 'nama_penerima';
@@ -56,10 +57,10 @@ class RastraResource extends Resource
                 Select::make('kabupaten')
                     ->nullable()
                     ->options(
-                        City::where('province_code', config('default.kodeprov'))
+                        City::where('province_code', config('custom.default.kodeprov'))
                             ->pluck('name', 'code')
                     )
-                    ->afterStateUpdated(fn(callable $set) => $set('kecamatan', null))
+                    ->afterStateUpdated(fn (callable $set) => $set('kecamatan', null))
                     ->reactive()
                     ->searchable(),
 
@@ -69,29 +70,30 @@ class RastraResource extends Resource
                     ->reactive()
                     ->options(function (callable $get) {
                         $kab = District::query()->where('city_code', $get('kabupaten'));
-                        if (!$kab) {
-                            return District::where('city_code', config('default.kodepkab'))
+                        if (! $kab) {
+                            return District::where('city_code', config('custom.default.kodepkab'))
                                 ->pluck('name', 'code');
                         }
 
                         return $kab->pluck('name', 'code');
                     })
-                    ->hidden(fn(callable $get) => !$get('kabupaten'))
-                    ->afterStateUpdated(fn(callable $set) => $set('kelurahan', null)),
+                    ->hidden(fn (callable $get) => ! $get('kabupaten'))
+                    ->afterStateUpdated(fn (callable $set) => $set('kelurahan', null)),
 
                 Select::make('kelurahan')
                     ->nullable()
                     ->options(function (callable $get) {
                         $kel = Village::query()->where('district_code', $get('kecamatan'));
-                        if (!$kel) {
+                        if (! $kel) {
                             return Village::where('district_code', '731211')
                                 ->pluck('name', 'code');
                         }
+
                         return $kel->pluck('name', 'code');
                     })
                     ->reactive()
                     ->searchable()
-                    ->hidden(fn(callable $get) => !$get('kecamatan'))
+                    ->hidden(fn (callable $get) => ! $get('kecamatan'))
                     ->afterStateUpdated(function (callable $set, $state) {
                         $village = Village::where('code', $state)->first();
                         if ($village) {
@@ -120,8 +122,8 @@ class RastraResource extends Resource
                     ->imageResizeTargetWidth('1920')
                     ->imageResizeTargetHeight('1080')
                     ->imagePreviewHeight('100')
-//                    ->panelLayout('integrated')
-//                    ->panelAspectRatio('2:1')
+                //                    ->panelLayout('integrated')
+                //                    ->panelAspectRatio('2:1')
                 ,
 
                 TextInput::make('lokasi')
