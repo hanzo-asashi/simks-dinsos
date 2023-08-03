@@ -21,6 +21,7 @@
         "filament/filament": "^3.0.0-beta27",
         "filament/spatie-laravel-settings-plugin": "3.0-stable",
         "guzzlehttp/guzzle": "^7.2",
+        "jackiedo/dotenv-editor": "^2.1",
         "jeffgreco13/filament-breezy": "^2.0",
         "kodepandai/laravel-indonesia": "^2.0",
         "laravel/framework": "^10.10",
@@ -42,7 +43,10 @@
             "App\\": "app/",
             "Database\\Factories\\": "database/factories/",
             "Database\\Seeders\\": "database/seeders/"
-        }
+        },
+        "files": [
+            "app/Helpers/helpers.php"
+        ]
     },
     "autoload-dev": {
         "psr-4": {

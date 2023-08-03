@@ -15,10 +15,10 @@ return new class extends Migration {
             $table->string('nama')->default('');
             $table->text('alamat')->default('');
             $table->integer('no_rumah')->nullable()->default(1);
-            $table->string('kodepos')->nullable()->default(setting('default.kodepos'));
+            $table->string('kodepos')->nullable()->default(config('default.kodepos'));
             $table->string('rt')->nullable();
             $table->string('rw')->nullable();
-            $table->string('kabupaten')->default(setting('default.kodekab'));
+            $table->string('kabupaten')->default(config('default.kodekab'));
             $table->string('kecamatan')->default('');
             $table->string('kelurahan')->default('');
             $table->string('lattitude')->nullable()->default('');

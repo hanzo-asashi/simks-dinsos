@@ -45,9 +45,9 @@ class AdminPanelProvider extends PanelProvider
 //                    ->enableSanctumTokens()
                     ->enableTwoFactorAuthentication(),
                 VersionsPlugin::make(),
-                StickyHeaderPlugin::make()
-                    ->floating()
-                    ->colored(),
+//                StickyHeaderPlugin::make()
+//                    ->floating()
+//                    ->colored(),
                 QuickCreatePlugin::make(),
                 CuratorPlugin::make()
 
