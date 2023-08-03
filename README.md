@@ -1,4 +1,4 @@
-<a href="https://github.com/hanzo-asashi/simks-dinsos" target="_blank"><img src="https://banners.beyondco.de/SIMKS%20Dinsos.png?theme=dark&packageManager=composer+require&packageName=hanzo-asashi%2Fsimks-dinsos&pattern=hexagons&style=style_1&description=Sistem+Informasi+Managemen+Kesejahteraan+Sosial+Dinas+Sosial+Kabupaten+Soppeng&md=1&showWatermark=1&fontSize=100px&images=identification" alt="SIMKS Logo"></a></p>
+<a href="https://github.com/hanzo-asashi/simks-dinsos" target="_blank"><img src="https://banners.beyondco.de/SIMKS%20Dinsos.png?theme=dark&packageManager=composer+require&packageName=hanzo-asashi%2Fsimks-dinsos&pattern=hexagons&style=style_1&description=Sistem+Informasi+Managemen+Kesejahteraan+Sosial+Dinas+Sosial+Kabupaten+Soppeng&md=1&showWatermark=1&fontSize=100px&images=identification" alt="SIMKS Logo"></a>
 
 <p align="center">
 <a href="https://github.com/hanzo-asashi/simks-dinsos/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
