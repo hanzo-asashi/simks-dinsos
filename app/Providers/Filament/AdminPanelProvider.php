@@ -42,7 +42,7 @@ class AdminPanelProvider extends PanelProvider
             ->plugins([
                 BreezyCore::make()
                     ->myProfile()
-//                    ->enableSanctumTokens()
+                    ->enableSanctumTokens()
                     ->enableTwoFactorAuthentication(),
                 VersionsPlugin::make(),
 //                StickyHeaderPlugin::make()
