@@ -2,8 +2,7 @@
 
 <p align="center">
 <a href="https://github.com/hanzo-asashi/simks-dinsos/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/github/downloads/hanzo-asashi/https%3A%2F%2Fgithub.com%2Fhanzo-asashi%2Fsimks-dinsos/total
-" alt="Total Downloads"></a>
+<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/github/downloads/hanzo-asashi/simks-dinsos/total" alt="Total Downloads"></a>
 <a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
 </p>
 
