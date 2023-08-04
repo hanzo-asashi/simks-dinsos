@@ -5,9 +5,9 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\HouseResource\Pages;
 use App\Models\House;
 use Cheesegrits\FilamentGoogleMaps\Fields\Geocomplete;
-use Filament\Forms\Components\Card;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Grid;
+use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
@@ -33,7 +33,31 @@ class HouseResource extends Resource
         return $form
             ->schema([
                 Grid::make()->schema([
-                    Card::make([
+                    Section::make('')->schema([
+                        Grid::make()->schema([
+                            FileUpload::make('foto_rumah')
+                                ->panelLayout('integrated')
+                                ->panelAspectRatio('2:1')
+                                ->preserveFilenames()
+                                ->image()
+                                ->maxSize(2048), FileUpload::make('foto_rumah')
+                                ->panelLayout('integrated')
+                                ->panelAspectRatio('2:1')
+                                ->preserveFilenames()
+                                ->image()
+                                ->maxSize(2048),
+                        ]),
+
+                        Grid::make()->schema([
+                            FileUpload::make('foto_rumah')
+                                ->panelLayout('integrated')
+                                ->panelAspectRatio('2:1')
+                                ->preserveFilenames()
+                                ->image()
+                                ->maxSize(2048),
+                        ]),
+                    ])->columns(1),
+                    Section::make('')->schema([
                         Grid::make(3)->schema([
                             FileUpload::make('foto_rumah')
                                 ->panelLayout('integrated')
@@ -56,10 +80,10 @@ class HouseResource extends Resource
                                 ->image()
                                 ->maxSize(2048),
                         ]),
-                    ]),
-                ]),
+                    ])->columns(1),
+                ])->columns(2),
 
-                Card::make([
+                Section::make()->schema([
                     Grid::make()->schema([
                         TextInput::make('nama')
                             ->required(),
