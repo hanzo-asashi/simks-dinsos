@@ -7,5 +7,5 @@ use Illuminate\Database\Eloquent\Model;
 
 class FamilyJenisBansos extends Model
 {
-    use HasFactory;
+
 }
