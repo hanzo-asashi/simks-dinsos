@@ -3,21 +3,21 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\JenisBansosResource\Pages;
-use App\Filament\Resources\JenisBansosResource\RelationManagers;
 use App\Models\JenisBansos;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class JenisBansosResource extends Resource
 {
     protected static ?string $model = JenisBansos::class;
+
     protected static ?string $label = 'Jenis Bansos';
+
     protected static ?string $pluralLabel = 'Jenis Bansos';
+
     protected static ?string $recordTitleAttribute = 'nama';
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
@@ -46,13 +46,13 @@ class JenisBansosResource extends Resource
                     ->limit(30)
                     ->searchable()
                     ->sortable(),
-//                Tables\Columns\TextColumn::make('warna'),
+                //                Tables\Columns\TextColumn::make('warna'),
                 Tables\Columns\BadgeColumn::make('short')
                     ->label('Alias')
-                    ->color(fn($record) => $record->warna),
-//                Tables\Columns\TextColumn::make('short')
-//                    ->searchable()->sortable()
-//                    ->label('Alias'),
+                    ->color(fn ($record) => $record->warna),
+                //                Tables\Columns\TextColumn::make('short')
+                //                    ->searchable()->sortable()
+                //                    ->label('Alias'),
                 Tables\Columns\TextColumn::make('deskripsi')
                     ->label('Deskripsi Bantuan')
                     ->limit(50),
@@ -61,11 +61,17 @@ class JenisBansosResource extends Resource
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\ActionGroup::make([
+                    Tables\Actions\ViewAction::make(),
+                    Tables\Actions\EditAction::make(),
+                    Tables\Actions\DeleteAction::make(),
+                ]),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\DeleteBulkAction::make()
+                        ->requiresConfirmation()
+                        ->deselectRecordsAfterCompletion(),
                 ]),
             ])
             ->emptyStateActions([

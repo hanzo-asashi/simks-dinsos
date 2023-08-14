@@ -2,45 +2,49 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use KodePandai\Indonesia\Models\City;
 use KodePandai\Indonesia\Models\District;
 use KodePandai\Indonesia\Models\Village;
+use Spatie\Image\Manipulations;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
-class House extends Model
+class House extends Model implements HasMedia
 {
-    use HasFactory;
+    use InteractsWithMedia;
 
     protected $fillable = [
-        'nama',
-        'house_uuid',
-        'qrcode',
+        'family_id',
         'alamat',
-        'lattitude',
-        'longitude',
-        'rt',
-        'rw',
+        'kodepos',
+        'rt_rw',
         'kabupaten',
         'kecamatan',
         'kelurahan',
-        'status',
+        'latitude',
+        'longitude',
+        'foto_rumah',
+        'status_rumah',
         'keterangan',
-        'no_rumah',
-        'kodepos',
     ];
 
     protected $casts = [
-        'house_uuid' => 'string',
-        'qrcode' => 'string',
+        'status_rumah' => 'boolean',
     ];
 
     protected $appends = [
-        'location'
+        'location',
     ];
 
-     public function kab(): BelongsTo
+    public function family(): BelongsTo
+    {
+        return $this->belongsTo(Family::class);
+    }
+
+    public function kab(): BelongsTo
     {
         return $this->belongsTo(City::class, 'kabupaten', 'code');
     }
@@ -58,8 +62,8 @@ class House extends Model
     public function getLocationAttribute(): array
     {
         return [
-            'lat' => (float)$this->latitude,
-            'lng' => (float)$this->longitude,
+            'lat' => (float) $this->latitude,
+            'lng' => (float) $this->longitude,
         ];
     }
 
@@ -71,8 +75,7 @@ class House extends Model
      *
      * Requires the 'location' attribute be included in this model's $fillable array.
      *
-     * @param ?array $location
-     * @return void
+     * @param  ?array  $location
      */
     public function setLocationAttribute(?array $location): void
     {
@@ -102,13 +105,17 @@ class House extends Model
      * Get the name of the computed location attribute
      *
      * Used by the Filament Google Maps package.
-     *
-     * @return string
      */
     public static function getComputedLocation(): string
     {
         return 'location';
     }
 
-
+    public function registerMediaConversions(Media $media = null): void
+    {
+        $this
+            ->addMediaConversion('preview')
+            ->fit(Manipulations::FIT_CROP, 300, 300)
+            ->nonQueued();
+    }
 }

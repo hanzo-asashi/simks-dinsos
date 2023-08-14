@@ -16,4 +16,5 @@ class ViewFamily extends ViewRecord
             Actions\EditAction::make(),
         ];
     }
+
 }

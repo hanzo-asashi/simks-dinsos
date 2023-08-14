@@ -4,17 +4,17 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\HouseResource\Pages;
 use App\Models\House;
-use Cheesegrits\FilamentGoogleMaps\Fields\Geocomplete;
-use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\Grid;
+use Filament\Forms\Components\Group;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
+use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use KodePandai\Indonesia\Models\City;
 use KodePandai\Indonesia\Models\District;
 use KodePandai\Indonesia\Models\Village;
 
@@ -22,9 +22,9 @@ class HouseResource extends Resource
 {
     protected static ?string $model = House::class;
 
-    protected static ?string $label = 'Rumah';
+    protected static ?string $label = 'Alamat Penerima Manfaat';
 
-    protected static ?string $pluralLabel = 'Rumah';
+    protected static ?string $pluralLabel = 'Alamat Penerima Manfaat';
 
     protected static ?string $navigationIcon = 'heroicon-o-home-modern';
 
@@ -32,138 +32,89 @@ class HouseResource extends Resource
     {
         return $form
             ->schema([
-                Grid::make()->schema([
-                    Section::make('')->schema([
-                        Grid::make()->schema([
-                            FileUpload::make('foto_rumah')
-                                ->panelLayout('integrated')
-                                ->panelAspectRatio('2:1')
-                                ->preserveFilenames()
-                                ->image()
-                                ->maxSize(2048), FileUpload::make('foto_rumah')
-                                ->panelLayout('integrated')
-                                ->panelAspectRatio('2:1')
-                                ->preserveFilenames()
-                                ->image()
-                                ->maxSize(2048),
-                        ]),
+                Group::make()->schema([
+                    Section::make()->schema([
+                        Select::make('family_id')
+                            ->label('Keluarga')
+                            ->lazy()
+                            ->searchable()
+                            ->preload()
+                            ->optionsLimit(10)
+                            ->relationship('family', 'nama_keluarga')
+                            ->required()
+                            ->createOptionForm([
+                                Section::make([
+                                    TextInput::make('nik')
+                                        ->label('Nomor Induk Kependudukan (NIK)')
+                                        ->maxLength(16)
+                                        ->required(),
 
-                        Grid::make()->schema([
-                            FileUpload::make('foto_rumah')
-                                ->panelLayout('integrated')
-                                ->panelAspectRatio('2:1')
-                                ->preserveFilenames()
-                                ->image()
-                                ->maxSize(2048),
-                        ]),
-                    ])->columns(1),
-                    Section::make('')->schema([
-                        Grid::make(3)->schema([
-                            FileUpload::make('foto_rumah')
-                                ->panelLayout('integrated')
-                                ->panelAspectRatio('2:1')
-                                ->preserveFilenames()
-                                ->image()
-                                ->maxSize(2048), FileUpload::make('foto_rumah')
-                                ->panelLayout('integrated')
-                                ->panelAspectRatio('2:1')
-                                ->preserveFilenames()
-                                ->image()
-                                ->maxSize(2048),
-                        ]),
+                                    TextInput::make('nokk')
+                                        ->label('Nomor Kartu Keluarga (KK)')
+                                        ->maxLength(16)
+                                        ->required(),
 
-                        Grid::make()->schema([
-                            FileUpload::make('foto_rumah')
-                                ->panelLayout('integrated')
-                                ->panelAspectRatio('2:1')
-                                ->preserveFilenames()
-                                ->image()
-                                ->maxSize(2048),
-                        ]),
-                    ])->columns(1),
-                ])->columns(2),
+                                    TextInput::make('nama_keluarga')
+                                        ->label('Nama Keluarga')
+                                        ->required(),
 
-                Section::make()->schema([
-                    Grid::make()->schema([
-                        TextInput::make('nama')
-                            ->required(),
+                                    TextInput::make('no_telepon')
+                                        ->maxLength(14)
+                                        ->required(),
 
-                        FileUpload::make('foto_rumah')
-                            ->panelLayout('integrated')
-                            ->panelAspectRatio('2:1')
-                            ->preserveFilenames()
-                            ->image()
-                            ->maxSize(2048),
+                                    Select::make('jenis_bansos_id')
+                                        ->label('Jenis Bantuan Sosial')
+                                        ->relationship('jenisBansos', 'nama')
+                                        ->multiple()
+                                        ->preload()
+                                        ->searchable()
+                                        ->searchingMessage('Sedang mencari...')
+                                        ->noSearchResultsMessage('Tidak ada ditemukan.')
+                                        ->searchDebounce(500)
+                                        ->createOptionForm([
+                                            TextInput::make('nama')->required(),
+                                            TextInput::make('short')->nullable(),
+                                        ]),
 
-                        //                        Geocomplete::make('alamat')
-                        //                            ->placeField('location')
-                        //                            ->isLocation()
-                        //                            ->reverseGeocode([
-                        //                                'city' => '%L',
-                        //                                'zip' => '%z',
-                        //                                'state' => '%A1',
-                        //                                'street' => '%n %S',
-                        //                            ])
-                        //                            ->countries(['id']) // restrict autocomplete results to these countries
-                        ////                    ->debug() // output the results of reverse geocoding in the browser console, useful for figuring out symbol formats
-                        //                            ->updateLatLng() // update the lat/lng fields on your form when a Place is selected
-                        //                            ->maxLength(1024)
-                        //                            ->placeholder('Mulai ketik alamat ...')
-                        //                            ->geolocate() // add a suffix button which requests and reverse geocodes the device location
-                        //                            ->geolocateIcon('heroicon-o-map'), // override the default icon for the geolocate button
-
-                        TextInput::make('no_rumah')
-                            ->integer(),
-
-                        TextInput::make('rt')
-                            ->nullable(),
-
-                        TextInput::make('rw')
-                            ->nullable(),
-
-                        Select::make('kabupaten')
-                            ->nullable()
-                            ->options(
-                                City::where('province_code', config('custom.default.kodeprov'))
-                                    ->pluck('name', 'code')
-                            )
-                            ->afterStateUpdated(fn (callable $set) => $set('kecamatan', null))
-                            ->reactive()
-                            ->searchable(),
+                                    Toggle::make('status_kpm')->default(true),
+                                ])->columns(2),
+                            ]),
+                        Textarea::make('alamat')->nullable(),
 
                         Select::make('kecamatan')
                             ->nullable()
                             ->searchable()
-                            ->reactive()
-                            ->options(function (callable $get) {
-                                $kab = District::query()->where('city_code', $get('kabupaten'));
-                                if (! $kab) {
+                            ->live(true)
+                            ->options(function () {
+                                $kab = District::query()->where('city_code', config('custom.default.kodekab'));
+                                if (!$kab) {
                                     return District::where('city_code', config('custom.default.kodekab'))
                                         ->pluck('name', 'code');
                                 }
 
                                 return $kab->pluck('name', 'code');
                             })
-                            ->afterStateUpdated(fn (callable $set) => $set('kelurahan', null)),
+                            ->afterStateUpdated(fn(callable $set) => $set('kelurahan', null)),
 
                         Select::make('kelurahan')
                             ->nullable()
                             ->options(function (callable $get) {
                                 $kel = Village::query()->where('district_code', $get('kecamatan'));
-                                if (! $kel) {
+                                if (!$kel) {
                                     return Village::where('district_code', '731211')
                                         ->pluck('name', 'code');
                                 }
 
                                 return $kel->pluck('name', 'code');
                             })
-                            ->reactive()
+                            ->live(true)
                             ->searchable()
                             ->afterStateUpdated(function (callable $set, callable $get, $state) {
                                 $village = Village::where('code', $state)->first();
                                 if ($village) {
                                     $set('latitude', $village['latitude']);
                                     $set('longitude', $village['longitude']);
+                                    $set('kodepos', $village['postal_code']);
                                     $set('location', [
                                         'lat' => (float) $village['latitude'],
                                         'lng' => (float) $village['longitude'],
@@ -172,10 +123,12 @@ class HouseResource extends Resource
                             }),
 
                         TextInput::make('kodepos')
+                            ->hidden()
                             ->default(config('default.kodepos')),
 
                         TextInput::make('latitude')
-                            ->reactive()
+                            ->hidden()
+                            ->live()
                             ->afterStateUpdated(function ($state, callable $get, callable $set) {
                                 $set('location', [
                                     'lat' => (float) $state,
@@ -184,7 +137,8 @@ class HouseResource extends Resource
                             })
                             ->lazy(), // important to use lazy, to avoid updates as you type
                         TextInput::make('longitude')
-                            ->reactive()
+                            ->hidden()
+                            ->live()
                             ->afterStateUpdated(function ($state, callable $get, callable $set) {
                                 $set('location', [
                                     'lat' => (float) $get('latitude'),
@@ -193,17 +147,28 @@ class HouseResource extends Resource
                             })
                             ->lazy(), // important to use lazy, to avoid updates as you type
 
-                        Select::make('status')
-                            ->options([
-                                1 => 'Aktif',
-                                0 => 'Non Aktif',
-                            ])->default(1),
-
                         TextInput::make('keterangan')
                             ->nullable()
                             ->rules(['max:255']),
-                    ]),
-                ]),
+
+                        Toggle::make('status_rumah')
+                            ->helperText('Aktif atau Non Aktif')
+                            ->default(true),
+                    ])->inlineLabel(),
+
+                    Section::make('Attachment')->schema([
+                        SpatieMediaLibraryFileUpload::make('foto_rumah')
+                            ->preserveFilenames()
+                            ->multiple()
+                            ->responsiveImages()
+                            ->conversion('thumb'),
+                    ])
+                        ->collapsible(),
+                ])->columnSpan(['lg' => fn(?House $record) => $record === null ? 3 : 2]),
+            ])
+            ->columns([
+                'sm' => 3,
+                'lg' => null,
             ]);
     }
 
@@ -211,41 +176,32 @@ class HouseResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('house_uuid')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('qrcode')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('nama')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('no_rumah')
-                    ->numeric()
+                Tables\Columns\TextColumn::make('family_id')
+                    ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('kodepos')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('rt')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('rw')
-                    ->searchable(),
+                Tables\Columns\TextColumn::make('alamat')
+                    ->searchable()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('kabupaten')
-                    ->searchable(),
+                    ->searchable()
+                    ->sortable()
+                    ->toggleable(true),
                 Tables\Columns\TextColumn::make('kecamatan')
-                    ->searchable(),
+                    ->searchable()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('kelurahan')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('lattitude')
-                    ->searchable(),
+                    ->searchable()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('latitude')
+                    ->searchable()
+                    ->sortable()
+                    ->toggleable(),
                 Tables\Columns\TextColumn::make('longitude')
-                    ->searchable(),
-                Tables\Columns\IconColumn::make('status')
+                    ->searchable()
+                    ->sortable()
+                    ->toggleable(),
+                Tables\Columns\IconColumn::make('status_rumah')
                     ->boolean(),
-                Tables\Columns\TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 //

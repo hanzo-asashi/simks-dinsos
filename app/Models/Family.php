@@ -2,31 +2,33 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Family extends Model
 {
-    use SoftDeletes, HasFactory;
-
     protected $fillable = [
         'dtks_id',
+        'family_id',
         'nik',
         'nokk',
-        'nama',
-        'alamat',
-        'kabupaten',
-        'kecamatan',
-        'kelurahan',
-        'no_rumah',
-        'kode_pos',
+        'nama_keluarga',
         'no_telepon',
         'jenis_bansos_id',
         'status_kpm',
     ];
 
-    public function jenisBansos(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    protected $casts = [
+        'status_kpm' => 'boolean',
+    ];
+
+    public function family(): BelongsTo
+    {
+        return $this->belongsTo(Family::class);
+    }
+
+    public function jenisBansos(): BelongsToMany
     {
         return $this->belongsToMany(JenisBansos::class);
     }

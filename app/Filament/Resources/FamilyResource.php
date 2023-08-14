@@ -4,31 +4,36 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\FamilyResource\Pages;
 use App\Models\Family;
-use Filament\Forms\Components\Card;
+use Awcodes\Shout\Components\Shout;
+use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
+use Filament\Infolists\Components\Grid;
+use Filament\Infolists\Components\Group;
+use Filament\Infolists\Components\Split;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Infolist;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
-use KodePandai\Indonesia\Models\City;
-use KodePandai\Indonesia\Models\District;
-use KodePandai\Indonesia\Models\Village;
-use Str;
 
 class FamilyResource extends Resource
 {
     protected static ?string $model = Family::class;
 
-    protected static ?string $label = 'Keluarga';
+    protected static ?string $label = 'Penerima Manfaat';
 
-    protected static ?string $pluralLabel = 'Keluarga';
+    protected static ?string $slug = 'keluarga';
 
-    protected static ?string $navigationIcon = 'heroicon-o-home-modern';
+    protected static ?string $pluralLabel = 'Penerima Manfaat';
+
+    protected static ?string $navigationIcon = 'heroicon-o-user-group';
 
     protected static ?string $recordTitleAttribute = 'nama';
 
@@ -36,102 +41,88 @@ class FamilyResource extends Resource
     {
         return $form
             ->schema([
-                Card::make([
-                    TextInput::make('dtks_id')
-                        ->maxLength(36)
-                        ->default(Str::orderedUuid()),
-
+                Shout::make('info')->content('Field bertanda * harus diisi.')->columnSpanFull(),
+                Section::make([
                     TextInput::make('nik')
+                        ->label('Nomor Induk Kependudukan (NIK)')
                         ->maxLength(16)
                         ->required(),
 
                     TextInput::make('nokk')
+                        ->label('Nomor Kartu Keluarga (KK)')
                         ->maxLength(16)
                         ->required(),
 
-                    TextInput::make('nama')
+                    TextInput::make('nama_keluarga')
+                        ->label('Nama Keluarga')
                         ->required(),
 
                     TextInput::make('no_telepon')
                         ->maxLength(14)
                         ->required(),
 
-                    Textarea::make('alamat')
-                        ->autosize()
-                        ->rows(1)
-                        ->required(),
-
-                    Select::make('kabupaten')
-                        ->nullable()
-                        ->options(
-                            City::where('province_code', config('custom.default.kodeprov'))
-                                ->pluck('name', 'code')
-                        )
-                        ->afterStateUpdated(fn (callable $set) => $set('kecamatan', null))
-                        ->reactive()
-                        ->searchable(),
-
-                    Select::make('kecamatan')
-                        ->nullable()
-                        ->searchable()
-                        ->reactive()
-                        ->options(function (callable $get) {
-                            $kab = District::query()->where('city_code', $get('kabupaten'));
-                            if (! $kab) {
-                                return District::where('city_code', config('custom.default.kodekab'))
-                                    ->pluck('name', 'code');
-                            }
-
-                            return $kab->pluck('name', 'code');
-                        })
-                        ->hidden(fn (callable $get) => ! $get('kabupaten'))
-                        ->afterStateUpdated(fn (callable $set) => $set('kelurahan', null)),
-
-                    Select::make('kelurahan')
-                        ->nullable()
-                        ->options(function (callable $get) {
-                            $kel = Village::query()->where('district_code', $get('kecamatan'));
-                            if (! $kel) {
-                                return Village::where('district_code', '731211')
-                                    ->pluck('name', 'code');
-                            }
-
-                            return $kel->pluck('name', 'code');
-                        })
-                        ->reactive()
-                        ->searchable()
-                        ->hidden(fn (callable $get) => ! $get('kecamatan'))
-                        ->afterStateUpdated(function (callable $set, $state) {
-                            $village = Village::where('code', $state)->first();
-                            if ($village) {
-                                $set('latitude', $village['latitude']);
-                                $set('longitude', $village['longitude']);
-                                $set('kode_pos', $village['postal_code']);
-                                $set('location', [
-                                    'lat' => (float) $village['latitude'],
-                                    'lng' => (float) $village['longitude'],
-                                ]);
-                            }
-
-                        }),
-                    TextInput::make('kode_pos')
-                        ->maxLength(6),
-
                     Select::make('jenis_bansos_id')
                         ->label('Jenis Bantuan Sosial')
-                        ->searchable()
+                        ->relationship('jenisBansos', 'nama')
                         ->multiple()
                         ->preload()
-                        ->relationship('jenisBansos', 'nama'),
-
-                    Select::make('status_kpm')
-                        ->label('Status Keluarga Penerima Manfaat (KPM)')
-                        ->required()
-                        ->options([
-                            1 => 'Aktif',
-                            0 => 'Non Aktif',
+                        ->searchable()
+                        ->searchingMessage('Sedang mencari...')
+                        ->noSearchResultsMessage('Tidak ada ditemukan.')
+                        ->searchDebounce(500)
+                        ->createOptionForm([
+                            TextInput::make('nama')->required(),
+                            TextInput::make('short')->nullable(),
                         ]),
-                ])->columns(2),
+
+                    Toggle::make('status_kpm')->default(true),
+
+                    //                    Select::make('status_kpm')
+                    //                        ->label('Status Keluarga Penerima Manfaat (KPM)')
+                    //                        ->required()
+                    //                        ->options([
+                    //                            1 => 'Aktif',
+                    //                            0 => 'Non Aktif',
+                    //                        ]),
+                ])->inlineLabel(),
+            ]);
+    }
+
+    public static function infolist(Infolist $infolist): Infolist
+    {
+        return $infolist
+            ->schema([
+                \Filament\Infolists\Components\Section::make([
+                    Split::make([
+                        Grid::make(2)
+                            ->schema([
+                                Group::make([
+                                    TextEntry::make('nik')
+                                        ->label('NIK Penerima Manfaat'),
+                                    TextEntry::make('nokk')
+                                        ->label('No. KK Penerima Manfaat'),
+                                    TextEntry::make('nama_keluarga')
+                                        ->label('Nama Penerima Manfaat'),
+                                ]),
+
+                                Group::make([
+                                    TextEntry::make('no_telepon')
+                                        ->label('No. Telepon / HP'),
+                                    TextEntry::make('jenisBansos.short')
+                                        ->badge()
+                                        ->listWithLineBreaks()
+                                        ->limitList(5)
+                                        ->label('Jenis Bantuan Sosial'),
+                                    TextEntry::make('created_at')
+                                        ->label('Published At')
+                                        ->badge()
+                                        ->date('l, d F Y')
+                                        ->color('success'),
+                                ]),
+
+                            ]),
+                    ])->from('lg'),
+                ]),
             ]);
     }
 
@@ -139,45 +130,48 @@ class FamilyResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('dtks_id')->searchable()->sortable(),
-
                 TextColumn::make('nik')->searchable()->sortable(),
 
                 TextColumn::make('nokk')->searchable()->sortable(),
 
-                TextColumn::make('nama')->searchable()->sortable(),
-
-                TextColumn::make('alamat')->searchable()->sortable(),
-
-                TextColumn::make('kabupaten')->searchable()->sortable(),
-
-                TextColumn::make('kecamatan')->searchable()->sortable(),
-
-                TextColumn::make('kelurahan')->searchable()->sortable(),
-
-                TextColumn::make('no_rumah'),
+                TextColumn::make('nama_keluarga')->searchable()->sortable(),
 
                 TextColumn::make('no_telepon')->searchable()->sortable(),
 
-                TextColumn::make('jenis_bansos_id')->searchable()->sortable(),
+                TextColumn::make('jenisBansos.short')
+                    ->badge()
+                    ->searchable()->sortable(),
 
-                TextColumn::make('status_kpm')->searchable()->sortable(),
+                TextColumn::make('status_kpm')
+                    ->label('Status')
+                    ->badge()
+                    ->color(fn (string $state): string => $state ? 'success' : 'danger')
+                    ->formatStateUsing(fn (string $state) => $state ? 'DTKS' : 'NON DTKS')
+                    ->searchable()->sortable(),
 
-                TextColumn::make('kode_pos')->searchable()->sortable(),
+                //                Tables\Columns\ToggleColumn::make('status_kpm')->searchable()->sortable(),
+
             ])
             ->filters([
-                Tables\Filters\TrashedFilter::make(),
+
             ])
             ->actions([
-                Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
-            ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                    Tables\Actions\ForceDeleteBulkAction::make(),
-                    Tables\Actions\RestoreBulkAction::make(),
+                Tables\Actions\ActionGroup::make([
+                    Tables\Actions\ViewAction::make(),
+                    Tables\Actions\EditAction::make(),
                 ]),
+            ])
+            ->groupedBulkActions([
+                Tables\Actions\DeleteBulkAction::make()
+                    ->action(function () {
+                        Notification::make()
+                            ->title('Now, now, don\'t be cheeky, leave some records for others to play with!')
+                            ->warning()
+                            ->send();
+                    }),
+                Tables\Actions\ForceDeleteBulkAction::make(),
+                Tables\Actions\RestoreBulkAction::make(),
+
             ])
             ->emptyStateActions([
                 Tables\Actions\CreateAction::make(),

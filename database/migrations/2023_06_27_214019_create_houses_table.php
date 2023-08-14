@@ -1,28 +1,28 @@
 <?php
+
 declare(strict_types=1);
 
+use App\Models\Family;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
+return new class extends Migration
+{
     public function up(): void
     {
         Schema::create('houses', static function (Blueprint $table) {
             $table->id();
-            $table->uuid('house_uuid')->nullable()->default(Str::orderedUuid());
-            $table->string('qrcode')->nullable()->default(Str::random(8));
-            $table->string('nama')->default('');
-            $table->text('alamat')->default('');
-            $table->integer('no_rumah')->nullable()->default(1);
-            $table->string('kodepos')->nullable()->default(config('default.kodepos'));
-            $table->string('rt')->nullable();
-            $table->string('rw')->nullable();
-            $table->string('kabupaten')->default(config('default.kodekab'));
-            $table->string('kecamatan')->default('');
-            $table->string('kelurahan')->default('');
-            $table->string('lattitude')->nullable()->default('');
-            $table->string('longitude')->nullable()->default('');
+            $table->foreignIdFor(Family::class)->constrained()->cascadeOnUpdate();
+            $table->text('alamat')->nullable();
+            $table->string('kodepos', 7)->nullable()->default(config('default.kodepos'));
+            $table->string('rt_rw', 15)->nullable();
+            $table->string('kabupaten', 50)->nullable()->default(config('default.kodekab'));
+            $table->string('kecamatan', 50)->nullable();
+            $table->string('kelurahan', 50)->nullable();
+            $table->string('latitude', 20)->nullable();
+            $table->string('longitude', 20)->nullable();
+            $table->json('foto_rumah')->nullable();
             $table->tinyInteger('status')->nullable()->default(0);
             $table->text('keterangan')->nullable();
             $table->timestamps();

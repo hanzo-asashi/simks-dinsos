@@ -2,13 +2,12 @@
 
 namespace App\Providers\Filament;
 
-use Awcodes\Curator\CuratorPlugin;
-use Awcodes\Curator\View\Components\Curation;
+use App\Filament\Widgets\LatestPenerimaManfaat;
+use App\Filament\Widgets\PenerimaManfaatChart;
+use App\Filament\Widgets\PenerimaManfaatOverview;
+use App\Filament\Widgets\RastraChart;
 use Awcodes\FilamentQuickCreate\QuickCreatePlugin;
-use Awcodes\FilamentStickyHeader\StickyHeaderPlugin;
 use Awcodes\FilamentVersions\VersionsPlugin;
-use Awcodes\FilamentVersions\VersionsWidget;
-use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
@@ -24,7 +23,7 @@ use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
-use Jeffgreco13\FilamentBreezy\BreezyCore;
+use ShuvroRoy\FilamentSpatieLaravelBackup\FilamentSpatieLaravelBackupPlugin;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -40,17 +39,9 @@ class AdminPanelProvider extends PanelProvider
             ->passwordReset()
             ->profile()
             ->plugins([
-                BreezyCore::make()
-                    ->myProfile()
-                    ->enableSanctumTokens()
-                    ->enableTwoFactorAuthentication(),
                 VersionsPlugin::make(),
-//                StickyHeaderPlugin::make()
-//                    ->floating()
-//                    ->colored(),
                 QuickCreatePlugin::make(),
-                CuratorPlugin::make()
-
+                FilamentSpatieLaravelBackupPlugin::make(),
             ])
             ->colors([
                 'primary' => Color::Blue,
@@ -66,7 +57,10 @@ class AdminPanelProvider extends PanelProvider
             ->widgets([
                 Widgets\AccountWidget::class,
                 Widgets\FilamentInfoWidget::class,
-//                VersionsWidget::class,
+                PenerimaManfaatOverview::class,
+                PenerimaManfaatChart::class,
+                RastraChart::class,
+                LatestPenerimaManfaat::class,
             ])
             ->middleware([
                 EncryptCookies::class,
