@@ -22,16 +22,17 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Tapp\FilamentAuditing\RelationManagers\AuditsRelationManager;
 
 class FamilyResource extends Resource
 {
     protected static ?string $model = Family::class;
 
-    protected static ?string $label = 'Penerima Manfaat';
+    protected static ?string $label = 'Keluarga';
 
     protected static ?string $slug = 'keluarga';
 
-    protected static ?string $pluralLabel = 'Penerima Manfaat';
+    protected static ?string $pluralLabel = 'Keluarga';
 
     protected static ?string $navigationIcon = 'heroicon-o-user-group';
 
@@ -98,9 +99,11 @@ class FamilyResource extends Resource
                             ->schema([
                                 Group::make([
                                     TextEntry::make('nik')
-                                        ->label('NIK Penerima Manfaat'),
+                                        ->label('NIK Penerima Manfaat')
+                                        ->copyable(),
                                     TextEntry::make('nokk')
-                                        ->label('No. KK Penerima Manfaat'),
+                                        ->label('No. KK Penerima Manfaat')
+                                        ->copyable(),
                                     TextEntry::make('nama_keluarga')
                                         ->label('Nama Penerima Manfaat'),
                                 ]),
@@ -181,7 +184,7 @@ class FamilyResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            AuditsRelationManager::class,
         ];
     }
 

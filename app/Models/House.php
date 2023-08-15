@@ -7,14 +7,16 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use KodePandai\Indonesia\Models\City;
 use KodePandai\Indonesia\Models\District;
 use KodePandai\Indonesia\Models\Village;
+use OwenIt\Auditing\Contracts\Auditable;
 use Spatie\Image\Manipulations;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
-class House extends Model implements HasMedia
+class House extends Model implements HasMedia, Auditable
 {
     use InteractsWithMedia;
+    use \OwenIt\Auditing\Auditable;
 
     protected $fillable = [
         'family_id',
@@ -32,6 +34,7 @@ class House extends Model implements HasMedia
     ];
 
     protected $casts = [
+        'foto_rumah' => 'array',
         'status_rumah' => 'boolean',
     ];
 

@@ -33,7 +33,6 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->id('admin')
             ->path('admin')
-//            ->authGuard('web|auth|auth:sanctum')
             ->login()
             ->registration()
             ->passwordReset()
@@ -52,6 +51,9 @@ class AdminPanelProvider extends PanelProvider
                 Pages\Dashboard::class,
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
+            ->navigationGroups([
+                'Settings',
+            ])
             ->databaseNotifications()
             ->databaseNotificationsPolling('30s')
             ->widgets([

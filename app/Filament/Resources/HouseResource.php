@@ -12,21 +12,31 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
+use Filament\Infolists\Components\Grid;
+use Filament\Infolists\Components\SpatieMediaLibraryImageEntry;
+use Filament\Infolists\Components\Split;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Infolist;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Database\Eloquent\Model;
 use KodePandai\Indonesia\Models\District;
 use KodePandai\Indonesia\Models\Village;
+use Tapp\FilamentAuditing\RelationManagers\AuditsRelationManager;
 
 class HouseResource extends Resource
 {
     protected static ?string $model = House::class;
 
-    protected static ?string $label = 'Alamat Penerima Manfaat';
+    protected static ?string $modelLabel = 'Rumah Keluarga';
 
-    protected static ?string $pluralLabel = 'Alamat Penerima Manfaat';
+    protected static ?string $pluralLabel = 'Rumah Keluarga';
 
     protected static ?string $navigationIcon = 'heroicon-o-home-modern';
+
+    protected static ?string $recordTitleAttribute = 'family_id';
 
     public static function form(Form $form): Form
     {
@@ -87,20 +97,20 @@ class HouseResource extends Resource
                             ->live(true)
                             ->options(function () {
                                 $kab = District::query()->where('city_code', config('custom.default.kodekab'));
-                                if (!$kab) {
+                                if (! $kab) {
                                     return District::where('city_code', config('custom.default.kodekab'))
                                         ->pluck('name', 'code');
                                 }
 
                                 return $kab->pluck('name', 'code');
                             })
-                            ->afterStateUpdated(fn(callable $set) => $set('kelurahan', null)),
+                            ->afterStateUpdated(fn (callable $set) => $set('kelurahan', null)),
 
                         Select::make('kelurahan')
                             ->nullable()
                             ->options(function (callable $get) {
                                 $kel = Village::query()->where('district_code', $get('kecamatan'));
-                                if (!$kel) {
+                                if (! $kel) {
                                     return Village::where('district_code', '731211')
                                         ->pluck('name', 'code');
                                 }
@@ -123,11 +133,9 @@ class HouseResource extends Resource
                             }),
 
                         TextInput::make('kodepos')
-                            ->hidden()
                             ->default(config('default.kodepos')),
 
                         TextInput::make('latitude')
-                            ->hidden()
                             ->live()
                             ->afterStateUpdated(function ($state, callable $get, callable $set) {
                                 $set('location', [
@@ -137,7 +145,6 @@ class HouseResource extends Resource
                             })
                             ->lazy(), // important to use lazy, to avoid updates as you type
                         TextInput::make('longitude')
-                            ->hidden()
                             ->live()
                             ->afterStateUpdated(function ($state, callable $get, callable $set) {
                                 $set('location', [
@@ -164,7 +171,7 @@ class HouseResource extends Resource
                             ->conversion('thumb'),
                     ])
                         ->collapsible(),
-                ])->columnSpan(['lg' => fn(?House $record) => $record === null ? 3 : 2]),
+                ])->columnSpan(['lg' => fn (?House $record) => $record === null ? 3 : 2]),
             ])
             ->columns([
                 'sm' => 3,
@@ -172,25 +179,75 @@ class HouseResource extends Resource
             ]);
     }
 
+    public static function infolist(Infolist $infolist): Infolist
+    {
+        return $infolist
+            ->schema([
+                \Filament\Infolists\Components\Section::make([
+                    Split::make([
+                        Grid::make(2)
+                            ->schema([
+                                \Filament\Infolists\Components\Group::make([
+                                    TextEntry::make('family.nama_keluarga')
+                                        ->label('Nama Keluarga')
+                                        ->copyable(),
+                                    TextEntry::make('family.nik')
+                                        ->label('NIK Keluarga')
+                                        ->copyable(),
+                                    TextEntry::make('family.nama_keluarga')
+                                        ->label('Nama Keluarga'),
+                                    TextEntry::make('latitude')
+                                        ->label('Latitude'),
+                                    TextEntry::make('longitude')
+                                        ->label('Longitude'),
+                                ]),
+
+                                \Filament\Infolists\Components\Group::make([
+                                    TextEntry::make('kab.name')
+                                        ->label('Kabupaten'),
+                                    TextEntry::make('kec.name')
+                                        ->label('Kecamatan'),
+                                    TextEntry::make('kel.name')
+                                        ->label('Kelurahan'),
+                                    TextEntry::make('created_at')
+                                        ->label('Published At')
+                                        ->badge()
+                                        ->date('l, d F Y')
+                                        ->color('success'),
+                                ]),
+                            ]),
+                    ])->from('lg'),
+                ]),
+                \Filament\Infolists\Components\Section::make([
+                    \Filament\Infolists\Components\Group::make([
+                        SpatieMediaLibraryImageEntry::make('foto_rumah'),
+                    ]),
+                ]),
+            ]);
+    }
+
     public static function table(Table $table): Table
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('family_id')
+                Tables\Columns\TextColumn::make('family.nama_keluarga')
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('alamat')
                     ->searchable()
+                    ->limit('40')
                     ->sortable(),
-                Tables\Columns\TextColumn::make('kabupaten')
+                Tables\Columns\TextColumn::make('kab.name')
                     ->searchable()
-                    ->sortable()
-                    ->toggleable(true),
-                Tables\Columns\TextColumn::make('kecamatan')
-                    ->searchable()
+                    ->toggleable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('kelurahan')
+                Tables\Columns\TextColumn::make('kec.name')
                     ->searchable()
+                    ->toggleable()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('kel.name')
+                    ->searchable()
+                    ->toggleable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('latitude')
                     ->searchable()
@@ -207,8 +264,14 @@ class HouseResource extends Resource
                 //
             ])
             ->actions([
-                Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\ActionGroup::make([
+                    Tables\Actions\ViewAction::make(),
+                    Tables\Actions\EditAction::make(),
+                    Tables\Actions\Action::make('Print')
+                        ->icon('heroicon-o-printer')
+                        ->color('warning')
+                        ->url(fn ($record) => route('filament.admin.resources.houses.print-dokumentasi', $record->id)),
+                ]),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -220,10 +283,17 @@ class HouseResource extends Resource
             ]);
     }
 
+    public static function getRecordTitle(?Model $record): string | Htmlable | null
+    {
+        $keluarga = HouseResource::getEloquentQuery()->first();
+
+        return $keluarga->family->nama_keluarga;
+    }
+
     public static function getRelations(): array
     {
         return [
-            //
+            AuditsRelationManager::class,
         ];
     }
 
@@ -234,6 +304,7 @@ class HouseResource extends Resource
             'create' => Pages\CreateHouse::route('/create'),
             'view' => Pages\ViewHouse::route('/{record}'),
             'edit' => Pages\EditHouse::route('/{record}/edit'),
+            'print-dokumentasi' => Pages\PrintDokumentasi::route('/{record}/print-dokumentasi'),
         ];
     }
 }
