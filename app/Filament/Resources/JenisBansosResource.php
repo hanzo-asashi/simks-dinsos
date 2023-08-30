@@ -16,11 +16,15 @@ class JenisBansosResource extends Resource
 
     protected static ?string $label = 'Jenis Bansos';
 
+    protected static ?string $navigationLabel = 'Jenis Bansos';
+
+    protected static ?string $navigationGroup = 'Master';
+
     protected static ?string $pluralLabel = 'Jenis Bansos';
 
     protected static ?string $recordTitleAttribute = 'nama';
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-document-text';
 
     public static function form(Form $form): Form
     {

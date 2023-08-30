@@ -17,6 +17,7 @@
         "awcodes/shout": "^2.0",
         "bezhansalleh/filament-exceptions": "^2.0",
         "bezhansalleh/filament-shield": "^3.0@beta",
+        "cheesegrits/filament-google-maps": "^3.0",
         "filament/filament": "^3.0",
         "filament/spatie-laravel-media-library-plugin": "3.0-stable",
         "filament/spatie-laravel-settings-plugin": "3.0-stable",

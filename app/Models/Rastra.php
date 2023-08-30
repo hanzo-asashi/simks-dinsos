@@ -2,17 +2,20 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use KodePandai\Indonesia\Models\City;
+use KodePandai\Indonesia\Models\District;
+use KodePandai\Indonesia\Models\Village;
+use OwenIt\Auditing\Contracts\Auditable;
 
-class Rastra extends Model
+class Rastra extends Model implements Auditable
 {
-    use SoftDeletes, HasFactory;
+    use SoftDeletes;
+    use \OwenIt\Auditing\Auditable;
 
     protected $table = 'rastra';
-//    protected $primaryKey = 'rastra_uuid';
-//    protected $keyType = 'uuid';
 
     protected $fillable = [
         'dtks_id',
@@ -38,6 +41,21 @@ class Rastra extends Model
         'tanggal_terima' => 'datetime',
         'status_dtks' => 'boolean',
         'dtks_id' => 'string',
-        'bukti_foto' => 'array'
+        'bukti_foto' => 'array',
     ];
+
+    public function kab(): BelongsTo
+    {
+        return $this->belongsTo(City::class, 'kabupaten', 'code');
+    }
+
+    public function kec(): BelongsTo
+    {
+        return $this->belongsTo(District::class, 'kecamatan', 'code');
+    }
+
+    public function kel(): BelongsTo
+    {
+        return $this->belongsTo(Village::class, 'kelurahan', 'code');
+    }
 }

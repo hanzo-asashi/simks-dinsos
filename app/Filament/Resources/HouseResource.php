@@ -4,11 +4,11 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\HouseResource\Pages;
 use App\Models\House;
+use Cheesegrits\FilamentGoogleMaps\Fields\Geocomplete;
 use Filament\Forms\Components\Group;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
-use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
@@ -30,9 +30,13 @@ class HouseResource extends Resource
 {
     protected static ?string $model = House::class;
 
-    protected static ?string $modelLabel = 'Rumah Keluarga';
+    protected static ?string $modelLabel = 'Penerima Manfaat';
 
-    protected static ?string $pluralLabel = 'Rumah Keluarga';
+    protected static ?string $navigationLabel = 'Penerima Manfaat';
+
+    protected static ?string $slug = 'penerima-manfaat';
+
+    protected static ?string $pluralLabel = 'Penerima Manfaat';
 
     protected static ?string $navigationIcon = 'heroicon-o-home-modern';
 
@@ -43,7 +47,7 @@ class HouseResource extends Resource
         return $form
             ->schema([
                 Group::make()->schema([
-                    Section::make()->schema([
+                    Section::make('Data Keluarga')->schema([
                         Select::make('family_id')
                             ->label('Keluarga')
                             ->lazy()
@@ -89,7 +93,20 @@ class HouseResource extends Resource
                                     Toggle::make('status_kpm')->default(true),
                                 ])->columns(2),
                             ]),
-                        Textarea::make('alamat')->nullable(),
+                    ]),
+
+                    Section::make('Data Lokasi')->schema([
+
+                        Geocomplete::make('alamat')
+                            ->reverseGeocode([
+                                'street' => '%n %S',
+                                'city' => '%L',
+                                'state' => '%A1',
+                                'zip' => '%z',
+                            ])
+                            ->countries(['id'])
+                            ->updateLatLng(),
+                        //                        Textarea::make('alamat')->nullable(),
 
                         Select::make('kecamatan')
                             ->nullable()
@@ -122,8 +139,8 @@ class HouseResource extends Resource
                             ->afterStateUpdated(function (callable $set, callable $get, $state) {
                                 $village = Village::where('code', $state)->first();
                                 if ($village) {
-                                    $set('latitude', $village['latitude']);
-                                    $set('longitude', $village['longitude']);
+                                    //                                    $set('latitude', $village['latitude']);
+                                    //                                    $set('longitude', $village['longitude']);
                                     $set('kodepos', $village['postal_code']);
                                     $set('location', [
                                         'lat' => (float) $village['latitude'],
@@ -133,49 +150,53 @@ class HouseResource extends Resource
                             }),
 
                         TextInput::make('kodepos')
+                            ->disabled()->dehydrated()
                             ->default(config('default.kodepos')),
 
                         TextInput::make('latitude')
-                            ->live()
-                            ->afterStateUpdated(function ($state, callable $get, callable $set) {
-                                $set('location', [
-                                    'lat' => (float) $state,
-                                    'lng' => (float) $get('longitude'),
-                                ]);
-                            })
-                            ->lazy(), // important to use lazy, to avoid updates as you type
+                            ->disabled()->dehydrated(),
+                        //                            ->live()
+                        //                            ->afterStateUpdated(function ($state, callable $get, callable $set) {
+                        //                                $set('location', [
+                        //                                    'lat' => (float) $state,
+                        //                                    'lng' => (float) $get('longitude'),
+                        //                                ]);
+                        //                            })
+                        //                            ->lazy(),
                         TextInput::make('longitude')
-                            ->live()
-                            ->afterStateUpdated(function ($state, callable $get, callable $set) {
-                                $set('location', [
-                                    'lat' => (float) $get('latitude'),
-                                    'lng' => (float) $state,
-                                ]);
-                            })
-                            ->lazy(), // important to use lazy, to avoid updates as you type
+                            ->disabled()->dehydrated(),
+                        //                            ->live()
+                        //                            ->afterStateUpdated(function ($state, callable $get, callable $set) {
+                        //                                $set('location', [
+                        //                                    'lat' => (float) $get('latitude'),
+                        //                                    'lng' => (float) $state,
+                        //                                ]);
+                        //                            })
+                        //                            ->lazy(), // important to use lazy, to avoid updates as you type
+                    ]),
+                ]),
 
+                Group::make([
+                    Section::make('Status Penerima Manfaat')->schema([
                         TextInput::make('keterangan')
                             ->nullable()
                             ->rules(['max:255']),
 
                         Toggle::make('status_rumah')
-                            ->helperText('Aktif atau Non Aktif')
+                            ->label('Status Aktifkan/Non Aktifkan Rumah')
+                            ->helperText('Aktif atau Non Aktif Status Rumah')
                             ->default(true),
-                    ])->inlineLabel(),
-
-                    Section::make('Attachment')->schema([
+                    ]),
+                    Section::make('Upload Data')->schema([
                         SpatieMediaLibraryFileUpload::make('foto_rumah')
+                            ->hiddenLabel()
                             ->preserveFilenames()
                             ->multiple()
                             ->responsiveImages()
                             ->conversion('thumb'),
                     ])
                         ->collapsible(),
-                ])->columnSpan(['lg' => fn (?House $record) => $record === null ? 3 : 2]),
-            ])
-            ->columns([
-                'sm' => 3,
-                'lg' => null,
+                ]),
             ]);
     }
 
@@ -270,7 +291,10 @@ class HouseResource extends Resource
                     Tables\Actions\Action::make('Print')
                         ->icon('heroicon-o-printer')
                         ->color('warning')
-                        ->url(fn ($record) => route('filament.admin.resources.houses.print-dokumentasi', $record->id)),
+                        ->url(fn ($record) => route(
+                            'filament.admin.resources.penerima-manfaat.print-dokumentasi',
+                            $record->id
+                        )),
                 ]),
             ])
             ->bulkActions([
