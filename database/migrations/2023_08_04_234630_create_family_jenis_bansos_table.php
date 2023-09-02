@@ -14,9 +14,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('family_jenis_bansos', function (Blueprint $table) {
-            $table->id();
-            $table->foreignIdFor(Family::class)->constrained()->cascadeOnUpdate()->restrictOnDelete();
-            $table->foreignIdFor(JenisBansos::class)->constrained()->cascadeOnUpdate()->restrictOnDelete();
+            $table->foreignIdFor(Family::class)->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(JenisBansos::class)->constrained()->cascadeOnDelete();
         });
     }
 

@@ -22,8 +22,7 @@ class AuthServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        Model::preventsAccessingMissingAttributes(!$this->app->environment('production'));
-        Model::unguard();
-        Model::preventsLazyLoading(!$this->app->environment('production'));
+        Model::preventsAccessingMissingAttributes(! $this->app->environment('production'));
+        Model::preventsLazyLoading(! $this->app->environment('production'));
     }
 }

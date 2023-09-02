@@ -1,17 +1,23 @@
 <?php
+
 declare(strict_types=1);
 
+use App\Models\Family;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
+return new class extends Migration
+{
     public function up(): void
     {
         Schema::create('rastra', function (Blueprint $table) {
             $table->id();
             $table->uuid('rastra_uuid')->default(Str::orderedUuid());
             $table->string('dtks_id')->nullable();
+            $table->foreignId(Family::class)
+                ->constrained('families')
+                ->cascadeOnDelete();
             $table->string('nik');
             $table->string('nokk')->nullable();
             $table->string('nama_penerima');
@@ -25,7 +31,7 @@ return new class extends Migration {
             $table->string('lokasi')->nullable();
             $table->string('latitude')->nullable();
             $table->string('longitude')->nullable();
-            $table->unsignedTinyInteger('status_rastra')->nullable();
+            $table->enum('status_rastra', ['Mampu', 'Belum Mampu'])->nullable();
             $table->boolean('status_dtks')->nullable();
             $table->softDeletes();
             $table->timestamps();

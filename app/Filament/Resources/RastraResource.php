@@ -19,7 +19,6 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
-use KodePandai\Indonesia\Models\City;
 use KodePandai\Indonesia\Models\District;
 use KodePandai\Indonesia\Models\Village;
 use Tapp\FilamentAuditing\RelationManagers\AuditsRelationManager;
@@ -71,30 +70,30 @@ class RastraResource extends Resource
                             ->rows(1)
                             ->required(),
 
-                        Select::make('kabupaten')
-                            ->nullable()
-                            ->options(
-                                City::where('province_code', config('custom.default.kodeprov'))
-                                    ->pluck('name', 'code')
-                            )
-                            ->afterStateUpdated(fn (callable $set) => $set('kecamatan', null))
-                            ->reactive()
-                            ->searchable(),
+                        //                        Select::make('kabupaten')
+                        //                            ->nullable()
+                        //                            ->options(
+                        //                                City::where('province_code', config('custom.default.kodeprov'))
+                        //                                    ->pluck('name', 'code')
+                        //                            )
+                        //                            ->afterStateUpdated(fn (callable $set) => $set('kecamatan', null))
+                        //                            ->reactive()
+                        //                            ->searchable(),
 
                         Select::make('kecamatan')
                             ->nullable()
                             ->searchable()
                             ->reactive()
                             ->options(function (callable $get) {
-                                $kab = District::query()->where('city_code', $get('kabupaten'));
+                                $kab = District::query()->where('city_code', config('custom.default.kodekab'));
                                 if (! $kab) {
-                                    return District::where('city_code', config('custom.default.kodepkab'))
+                                    return District::where('city_code', config('custom.default.kodekab'))
                                         ->pluck('name', 'code');
                                 }
 
                                 return $kab->pluck('name', 'code');
                             })
-                            ->hidden(fn (callable $get) => ! $get('kabupaten'))
+//                            ->hidden(fn (callable $get) => ! $get('kabupaten'))
                             ->afterStateUpdated(fn (callable $set) => $set('kelurahan', null)),
 
                         Select::make('kelurahan')
@@ -110,7 +109,7 @@ class RastraResource extends Resource
                             })
                             ->reactive()
                             ->searchable()
-                            ->hidden(fn (callable $get) => ! $get('kecamatan'))
+//                            ->hidden(fn (callable $get) => ! $get('kecamatan'))
                             ->afterStateUpdated(function (callable $set, $state) {
                                 $village = Village::where('code', $state)->first();
                                 if ($village) {

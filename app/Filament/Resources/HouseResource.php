@@ -106,7 +106,6 @@ class HouseResource extends Resource
                             ])
                             ->countries(['id'])
                             ->updateLatLng(),
-                        //                        Textarea::make('alamat')->nullable(),
 
                         Select::make('kecamatan')
                             ->nullable()
@@ -139,8 +138,6 @@ class HouseResource extends Resource
                             ->afterStateUpdated(function (callable $set, callable $get, $state) {
                                 $village = Village::where('code', $state)->first();
                                 if ($village) {
-                                    //                                    $set('latitude', $village['latitude']);
-                                    //                                    $set('longitude', $village['longitude']);
                                     $set('kodepos', $village['postal_code']);
                                     $set('location', [
                                         'lat' => (float) $village['latitude'],

@@ -13,7 +13,7 @@ use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
-class House extends Model implements HasMedia, Auditable
+class House extends Model implements Auditable, HasMedia
 {
     use InteractsWithMedia;
     use \OwenIt\Auditing\Auditable;

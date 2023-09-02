@@ -16,7 +16,7 @@ return new class extends Migration
             $table->uuid('dtks_id')->nullable()->default(Str::orderedUuid());
             $table->string('nik', 16);
             $table->string('nokk', 16);
-            $table->string('nama_keluarga'. 150);
+            $table->string('nama_keluarga' . 150);
             $table->string('no_telepon', 14);
             $table->foreignIdFor(JenisBansos::class);
             $table->unsignedTinyInteger('status_kpm')->default(0)->nullable();

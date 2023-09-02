@@ -29,7 +29,7 @@ class RegionResource extends Resource
             ->schema([
                 Section::make()->schema([
                     Select::make('house_id')
-                        ->options(House::pluck('nama', 'id'))
+                        ->options(House::pluck('alamat', 'id'))
                         ->searchable(),
                     Select::make('kabupaten')
                         ->nullable()

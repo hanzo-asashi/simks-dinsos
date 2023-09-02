@@ -13,10 +13,10 @@ return new class extends Migration
     {
         Schema::create('houses', static function (Blueprint $table) {
             $table->id();
-            $table->foreignIdFor(Family::class)->constrained()->cascadeOnUpdate();
-            $table->text('alamat')->nullable();
-            $table->string('kodepos', 7)->nullable()->default(config('default.kodepos'));
+            $table->foreignIdFor(Family::class)->constrained()->cascadeOnDelete();
+            $table->string('alamat');
             $table->string('rt_rw', 15)->nullable();
+            $table->string('kodepos', 7)->nullable()->default(config('default.kodepos'));
             $table->string('kabupaten', 50)->nullable()->default(config('default.kodekab'));
             $table->string('kecamatan', 50)->nullable();
             $table->string('kelurahan', 50)->nullable();
