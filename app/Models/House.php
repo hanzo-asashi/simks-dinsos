@@ -2,11 +2,9 @@
 
 namespace App\Models;
 
+use App\Concerns\HasWilayah;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use KodePandai\Indonesia\Models\City;
-use KodePandai\Indonesia\Models\District;
-use KodePandai\Indonesia\Models\Village;
 use OwenIt\Auditing\Contracts\Auditable;
 use Spatie\Image\Manipulations;
 use Spatie\MediaLibrary\HasMedia;
@@ -15,6 +13,7 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class House extends Model implements Auditable, HasMedia
 {
+    use HasWilayah;
     use InteractsWithMedia;
     use \OwenIt\Auditing\Auditable;
 
@@ -42,24 +41,49 @@ class House extends Model implements Auditable, HasMedia
         'location',
     ];
 
+    /**
+     * Get the lat and lng attribute/field names used on this table
+     *
+     * Used by the Filament Google Maps package.
+     *
+     * @return string[]
+     */
+    public static function getLatLngAttributes(): array
+    {
+        return [
+            'lat' => 'latitude',
+            'lng' => 'longitude',
+        ];
+    }
+
+    //    public function kab(): BelongsTo
+    //    {
+    //        return $this->belongsTo(City::class, 'kabupaten', 'code');
+    //    }
+    //
+    //    public function kec(): BelongsTo
+    //    {
+    //        return $this->belongsTo(District::class, 'kecamatan', 'code');
+    //    }
+    //
+    //    public function kel(): BelongsTo
+    //    {
+    //        return $this->belongsTo(Village::class, 'kelurahan', 'code');
+    //    }
+
+    /**
+     * Get the name of the computed location attribute
+     *
+     * Used by the Filament Google Maps package.
+     */
+    public static function getComputedLocation(): string
+    {
+        return 'location';
+    }
+
     public function family(): BelongsTo
     {
         return $this->belongsTo(Family::class);
-    }
-
-    public function kab(): BelongsTo
-    {
-        return $this->belongsTo(City::class, 'kabupaten', 'code');
-    }
-
-    public function kec(): BelongsTo
-    {
-        return $this->belongsTo(District::class, 'kecamatan', 'code');
-    }
-
-    public function kel(): BelongsTo
-    {
-        return $this->belongsTo(Village::class, 'kelurahan', 'code');
     }
 
     public function getLocationAttribute(): array
@@ -87,31 +111,6 @@ class House extends Model implements Auditable, HasMedia
             $this->attributes['longitude'] = $location['lng'];
             unset($this->attributes['location']);
         }
-    }
-
-    /**
-     * Get the lat and lng attribute/field names used on this table
-     *
-     * Used by the Filament Google Maps package.
-     *
-     * @return string[]
-     */
-    public static function getLatLngAttributes(): array
-    {
-        return [
-            'lat' => 'latitude',
-            'lng' => 'longitude',
-        ];
-    }
-
-    /**
-     * Get the name of the computed location attribute
-     *
-     * Used by the Filament Google Maps package.
-     */
-    public static function getComputedLocation(): string
-    {
-        return 'location';
     }
 
     public function registerMediaConversions(Media $media = null): void

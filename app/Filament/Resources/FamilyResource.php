@@ -2,13 +2,14 @@
 
 namespace App\Filament\Resources;
 
+use App\Enums\StatusKeluargaAnggotaEnum;
 use App\Filament\Resources\FamilyResource\Pages;
 use App\Models\Family;
+use Awcodes\FilamentTableRepeater\Components\TableRepeater;
 use Awcodes\Shout\Components\Shout;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
 use Filament\Infolists\Components\Grid;
 use Filament\Infolists\Components\Group;
@@ -43,50 +44,93 @@ class FamilyResource extends Resource
         return $form
             ->schema([
                 Shout::make('info')->content('Field bertanda * harus diisi.')->columnSpanFull(),
-                Section::make([
-                    TextInput::make('nik')
-                        ->label('Nomor Induk Kependudukan (NIK)')
-                        ->maxLength(16)
-                        ->required(),
+                \Filament\Forms\Components\Group::make()->schema([
+                    Section::make([
+                        TextInput::make('nik')
+                            ->label('Nomor Induk Kependudukan (NIK)')
+                            ->maxLength(16)
+                            ->required(),
 
-                    TextInput::make('nokk')
-                        ->label('Nomor Kartu Keluarga (KK)')
-                        ->maxLength(16)
-                        ->required(),
+                        TextInput::make('nokk')
+                            ->label('Nomor Kartu Keluarga (KK)')
+                            ->maxLength(16)
+                            ->required(),
 
-                    TextInput::make('nama_keluarga')
-                        ->label('Nama Keluarga')
-                        ->required(),
+                        TextInput::make('nama_keluarga')
+                            ->label('Nama Keluarga')
+                            ->required(),
 
-                    TextInput::make('no_telepon')
-                        ->maxLength(14)
-                        ->required(),
+                        TextInput::make('no_telepon')
+                            ->maxLength(14)
+                            ->required(),
+                        Select::make('jenis_bansos_id')
+                            ->label('Jenis Bantuan Sosial')
+                            ->relationship('jenisBansos', 'nama')
+                            ->multiple()
+                            ->preload()
+                            ->searchable()
+                            ->searchingMessage('Sedang mencari...')
+                            ->noSearchResultsMessage('Tidak ada ditemukan.')
+                            ->searchDebounce(500)
+                            ->createOptionForm([
+                                TextInput::make('nama')->required(),
+                                TextInput::make('short')->nullable(),
+                            ]),
 
-                    Select::make('jenis_bansos_id')
-                        ->label('Jenis Bantuan Sosial')
-                        ->relationship('jenisBansos', 'nama')
-                        ->multiple()
-                        ->preload()
-                        ->searchable()
-                        ->searchingMessage('Sedang mencari...')
-                        ->noSearchResultsMessage('Tidak ada ditemukan.')
-                        ->searchDebounce(500)
-                        ->createOptionForm([
-                            TextInput::make('nama')->required(),
-                            TextInput::make('short')->nullable(),
-                        ]),
+                        Select::make('status_kpm')
+                            ->label('Status Keluarga Penerima Manfaat (KPM)')
+                            ->required()
+                            ->options([
+                                1 => 'Aktif',
+                                0 => 'Non Aktif',
+                            ])
+                            ->default(1),
+                    ])->inlineLabel(),
+                ])->columnSpanFull(),
 
-                    Toggle::make('status_kpm')->default(true),
+                \Filament\Forms\Components\Group::make()->schema([
+                    Section::make('Tambah Anggota Keluarga')->schema([
+                        TableRepeater::make('anggota')
+                            ->hiddenLabel()
+                            ->withoutHeader()
+                            ->schema(static::anggotaSchema())
+                            ->columns(2)
+                            ->relationship('anggota'),
+                    ]),
+                ])->columnSpanFull(),
 
-                    //                    Select::make('status_kpm')
-                    //                        ->label('Status Keluarga Penerima Manfaat (KPM)')
-                    //                        ->required()
-                    //                        ->options([
-                    //                            1 => 'Aktif',
-                    //                            0 => 'Non Aktif',
-                    //                        ]),
-                ])->inlineLabel(),
             ]);
+    }
+
+    public static function anggotaSchema(): array
+    {
+        return [
+            TextInput::make('nik_anggota')
+                ->label('NIK Anggota')
+                ->required(),
+            TextInput::make('nokk_anggota')
+                ->label('NO KK Anggota')
+                ->required(),
+            TextInput::make('nama_anggota')
+                ->label('Nama Anggota')
+                ->required(),
+            Select::make('jenis_bansos_id')
+                ->label('Jenis Bantuan')
+                ->relationship('jenisBantuan', 'nama')
+                ->multiple()
+                ->preload()
+                ->searchable()
+                ->searchingMessage('Sedang mencari...')
+                ->noSearchResultsMessage('Tidak ada ditemukan.')
+                ->searchDebounce(500)
+                ->createOptionForm([
+                    TextInput::make('nama')->required(),
+                    TextInput::make('short')->nullable(),
+                ]),
+            Select::make('status_keluarga_anggota')
+                ->searchable()
+                ->options(StatusKeluargaAnggotaEnum::asSelectArray()),
+        ];
     }
 
     public static function infolist(Infolist $infolist): Infolist
@@ -133,26 +177,44 @@ class FamilyResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('nik')->searchable()->sortable(),
+                TextColumn::make('nik')
+                    ->searchable()
+                    ->sortable()
+                    ->toggleable()
+                    ->copyable()
+                    ->label('NIK Keluarga'),
 
-                TextColumn::make('nokk')->searchable()->sortable(),
+                TextColumn::make('nokk')
+                    ->label('NO. KK Keluarga')
+                    ->copyable()
+                    ->searchable()
+                    ->sortable()
+                    ->toggleable(),
 
-                TextColumn::make('nama_keluarga')->searchable()->sortable(),
+                TextColumn::make('nama_keluarga')
+                    ->label('Nama Keluarga')
+                    ->toggleable()
+                    ->searchable()
+                    ->sortable(),
 
-                TextColumn::make('no_telepon')->searchable()->sortable(),
+                TextColumn::make('no_telepon')
+                    ->label('No. Telepon/HP')
+                    ->toggleable()
+                    ->searchable()
+                    ->sortable(),
 
                 TextColumn::make('jenisBansos.short')
+                    ->label('Jenis Bantuan')
                     ->badge()
                     ->searchable()->sortable(),
 
                 TextColumn::make('status_kpm')
-                    ->label('Status')
-                    ->badge()
+                    ->label('Status DTKS')
+                    ->alignCenter()
+                    ->badge(fn (string $state): string => $state ? 'success' : 'danger')
                     ->color(fn (string $state): string => $state ? 'success' : 'danger')
                     ->formatStateUsing(fn (string $state) => $state ? 'DTKS' : 'NON DTKS')
                     ->searchable()->sortable(),
-
-                //                Tables\Columns\ToggleColumn::make('status_kpm')->searchable()->sortable(),
 
             ])
             ->filters([
@@ -162,6 +224,7 @@ class FamilyResource extends Resource
                 Tables\Actions\ActionGroup::make([
                     Tables\Actions\ViewAction::make(),
                     Tables\Actions\EditAction::make(),
+                    Tables\Actions\DeleteAction::make(),
                 ]),
             ])
             ->groupedBulkActions([

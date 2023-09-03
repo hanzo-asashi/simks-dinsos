@@ -11,22 +11,24 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('houses', static function (Blueprint $table) {
-            $table->id();
-            $table->foreignIdFor(Family::class)->constrained()->cascadeOnDelete();
-            $table->string('alamat');
-            $table->string('rt_rw', 15)->nullable();
-            $table->string('kodepos', 7)->nullable()->default(config('default.kodepos'));
-            $table->string('kabupaten', 50)->nullable()->default(config('default.kodekab'));
-            $table->string('kecamatan', 50)->nullable();
-            $table->string('kelurahan', 50)->nullable();
-            $table->string('latitude', 20)->nullable();
-            $table->string('longitude', 20)->nullable();
-            $table->json('foto_rumah')->nullable();
-            $table->tinyInteger('status')->nullable()->default(0);
-            $table->text('keterangan')->nullable();
-            $table->timestamps();
-        });
+        if (! Schema::hasTable('houses')) {
+            Schema::create('houses', static function (Blueprint $table) {
+                $table->id();
+                $table->foreignIdFor(Family::class)->constrained()->cascadeOnDelete();
+                $table->string('alamat');
+                $table->string('rt_rw', 15)->nullable();
+                $table->string('kodepos', 7)->nullable()->default(config('default.kodepos'));
+                $table->string('kabupaten', 50)->nullable()->default(config('default.kodekab'));
+                $table->string('kecamatan', 50)->nullable();
+                $table->string('kelurahan', 50)->nullable();
+                $table->string('latitude', 20)->nullable();
+                $table->string('longitude', 20)->nullable();
+                $table->json('foto_rumah')->nullable();
+                $table->tinyInteger('status')->nullable()->default(0);
+                $table->text('keterangan')->nullable();
+                $table->timestamps();
+            });
+        }
     }
 
     public function down(): void

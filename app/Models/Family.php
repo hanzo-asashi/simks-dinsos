@@ -10,6 +10,7 @@ use OwenIt\Auditing\Contracts\Auditable;
 class Family extends Model implements Auditable
 {
     use \OwenIt\Auditing\Auditable;
+
     protected $fillable = [
         'dtks_id',
         'family_id',
@@ -33,5 +34,10 @@ class Family extends Model implements Auditable
     public function jenisBansos(): BelongsToMany
     {
         return $this->belongsToMany(JenisBansos::class);
+    }
+
+    public function anggota(): BelongsToMany
+    {
+        return $this->belongsToMany(Anggota::class, 'anggota_keluargas');
     }
 }

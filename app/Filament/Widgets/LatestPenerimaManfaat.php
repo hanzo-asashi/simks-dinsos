@@ -10,9 +10,11 @@ use Filament\Widgets\TableWidget as BaseWidget;
 
 class LatestPenerimaManfaat extends BaseWidget
 {
-    protected int|string|array $columnSpan = 'full';
+    protected static ?string $heading = 'Penerima Manfaat Terbaru';
 
     protected static ?int $sort = 3;
+
+    protected int | string | array $columnSpan = 'full';
 
     public function table(Table $table): Table
     {
@@ -22,32 +24,43 @@ class LatestPenerimaManfaat extends BaseWidget
             ->defaultSort('created_at', 'desc')
             ->columns([
                 Tables\Columns\TextColumn::make('created_at')
-                    ->label('Order Date')
-                    ->date()
+                    ->label('Tanggal')
+                    ->date('d/m/Y')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('nik')
+                    ->label('NIK Keluarga')
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('nokk')
+                    ->label('No KK Keluarga')
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('nama_keluarga')
+                    ->label('Nama Keluarga')
                     ->searchable()
                     ->sortable(),
 
-                Tables\Columns\TextColumn::make('status_kpm')
-                    ->label('Status Penerima')
-                    ->badge()
-                    ->formatStateUsing(fn ($state) => $state ? 'Aktif' : 'Non Aktif'),
                 Tables\Columns\TextColumn::make('jenisBansos.short')
+                    ->alignCenter()
+                    ->label('Jenis Bantuan')
                     ->searchable()
                     ->sortable()
                     ->badge()
                     ->listWithLineBreaks(),
+
+                Tables\Columns\TextColumn::make('status_kpm')
+                    ->alignCenter()
+                    ->label('Status Penerima')
+                    ->badge()
+                    ->color(fn ($state) => $state ? 'success' : 'danger')
+                    ->formatStateUsing(fn ($state) => $state ? 'AKTIF' : 'NON AKTIF'),
             ])
+            ->deferLoading()
+            ->striped()
             ->actions([
-                Tables\Actions\Action::make('open')
-                    ->url(fn (Family $record): string => FamilyResource::getUrl('edit', ['record' => $record])),
+                Tables\Actions\Action::make('Lihat')
+                    ->url(fn (Family $record): string => FamilyResource::getUrl('edit', ['record' => $record]))
+                    ->icon('heroicon-o-magnifying-glass'),
             ]);
     }
 }

@@ -10,13 +10,15 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('jenis_bansos', function (Blueprint $table) {
-            $table->id();
-            $table->string('nama', 30);
-            $table->string('warna')->nullable()->default('primary');
-            $table->string('short')->nullable();
-            $table->string('deskripsi')->nullable();
-        });
+        if (! Schema::hasTable('jenis_bansos')) {
+            Schema::create('jenis_bansos', function (Blueprint $table) {
+                $table->id();
+                $table->string('nama', 30);
+                $table->string('warna')->nullable()->default('primary');
+                $table->string('short')->nullable();
+                $table->string('deskripsi')->nullable();
+            });
+        }
     }
 
     public function down(): void

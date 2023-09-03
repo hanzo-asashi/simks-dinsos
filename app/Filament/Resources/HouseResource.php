@@ -40,7 +40,7 @@ class HouseResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-home-modern';
 
-    protected static ?string $recordTitleAttribute = 'family_id';
+    protected static ?string $recordTitleAttribute = 'nama_keluarga';
 
     public static function form(Form $form): Form
     {

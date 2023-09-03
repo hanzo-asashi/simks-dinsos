@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Anggota;
 use App\Models\Family;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -12,17 +13,17 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('anggota_keluargas', function (Blueprint $table) {
-            $table->id();
-            $table->foreignIdFor(Family::class)
-                ->constrained('families')
-                ->cascadeOnDelete();
-            $table->string('nik');
-            $table->string('nokk');
-            $table->string('nama_anggota');
-            $table->string('nama_anggota');
-            $table->timestamps();
-        });
+        if (! Schema::hasTable('anggota_keluargas')) {
+            Schema::create('anggota_keluargas', function (Blueprint $table) {
+                $table->foreignIdFor(Family::class)
+                    ->constrained('families')
+                    ->cascadeOnDelete();
+
+                $table->foreignIdFor(Anggota::class)
+                    ->constrained('anggotas')
+                    ->cascadeOnDelete();
+            });
+        }
     }
 
     /**
