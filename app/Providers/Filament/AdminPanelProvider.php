@@ -8,7 +8,6 @@ use App\Filament\Widgets\PenerimaManfaatChart;
 use App\Filament\Widgets\PenerimaManfaatOverview;
 use App\Filament\Widgets\RastraChart;
 use Awcodes\FilamentQuickCreate\QuickCreatePlugin;
-use Awcodes\FilamentVersions\VersionsPlugin;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
@@ -18,8 +17,6 @@ use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
 use Filament\Widgets\AccountWidget;
-use Hasnayeen\Themes\Http\Middleware\SetTheme;
-use Hasnayeen\Themes\ThemesPlugin;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
@@ -27,7 +24,7 @@ use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
-use Njxqlus\FilamentProgressbar\FilamentProgressbarPlugin;
+use pxlrbt\FilamentSpotlight\SpotlightPlugin;
 use ShuvroRoy\FilamentSpatieLaravelBackup\FilamentSpatieLaravelBackupPlugin;
 
 class AdminPanelProvider extends PanelProvider
@@ -36,7 +33,6 @@ class AdminPanelProvider extends PanelProvider
     {
         return $panel
             ->default()
-            ->topNavigation()
             ->maxContentWidth('full')
             ->id('admin')
             ->path('admin')
@@ -45,11 +41,9 @@ class AdminPanelProvider extends PanelProvider
             ->passwordReset()
             ->profile()
             ->plugins([
-                VersionsPlugin::make(),
                 QuickCreatePlugin::make(),
                 FilamentSpatieLaravelBackupPlugin::make(),
-                FilamentProgressbarPlugin::make()->color('#29b'),
-                ThemesPlugin::make()->canViewThemesPage(fn () => auth()->user()->id === 1),
+                SpotlightPlugin::make(),
             ])
             ->colors([
                 'primary' => Color::Teal,
@@ -62,6 +56,7 @@ class AdminPanelProvider extends PanelProvider
             ->pages([
                 Pages\Dashboard::class,
             ])
+            ->globalSearchKeyBindings(['command+k', 'CTRL+K'])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->navigationGroups([
                 NavigationGroup::make()
@@ -91,7 +86,6 @@ class AdminPanelProvider extends PanelProvider
                 SubstituteBindings::class,
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
-                SetTheme::class,
             ])
             ->authMiddleware([
                 Authenticate::class,

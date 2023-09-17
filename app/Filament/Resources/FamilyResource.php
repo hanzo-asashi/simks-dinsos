@@ -6,7 +6,6 @@ use App\Enums\StatusKeluargaAnggotaEnum;
 use App\Filament\Resources\FamilyResource\Pages;
 use App\Models\Family;
 use Awcodes\FilamentTableRepeater\Components\TableRepeater;
-use Awcodes\Shout\Components\Shout;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -23,6 +22,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use pxlrbt\FilamentExcel\Actions\Tables\ExportBulkAction;
 use Tapp\FilamentAuditing\RelationManagers\AuditsRelationManager;
 
 class FamilyResource extends Resource
@@ -43,7 +43,8 @@ class FamilyResource extends Resource
     {
         return $form
             ->schema([
-                Shout::make('info')->content('Field bertanda * harus diisi.')->columnSpanFull(),
+                //                Shout::make('info')->content('Field bertanda * harus diisi.')
+                //                    ->columnSpanFull(),
                 \Filament\Forms\Components\Group::make()->schema([
                     Section::make([
                         TextInput::make('nik')
@@ -235,6 +236,7 @@ class FamilyResource extends Resource
                             ->warning()
                             ->send();
                     }),
+                ExportBulkAction::make(),
                 Tables\Actions\ForceDeleteBulkAction::make(),
                 Tables\Actions\RestoreBulkAction::make(),
 
