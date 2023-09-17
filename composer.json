@@ -37,6 +37,7 @@
         "tapp/filament-auditing": "^3.0"
     },
     "require-dev": {
+        "roave/security-advisories": "dev-latest",
         "barryvdh/laravel-debugbar": "^3.8",
         "ergebnis/composer-normalize": "^2.35",
         "fakerphp/faker": "^1.9.1",
