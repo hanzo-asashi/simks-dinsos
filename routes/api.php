@@ -7,30 +7,19 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Validation\ValidationException;
 
-/*
-|--------------------------------------------------------------------------
-| API Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register API routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "api" middleware group. Make something great!
-|
-*/
-
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
 Route::middleware('guest')->group(function () {
-    Route::get('/family/{id}', function (string $id) {
+    Route::get('/family/{id}', static function (string $id) {
         return new FamilyResource(Family::findOrFail($id));
     });
 
     //    Route::resource('family', FamilyController::class);
 });
 
-Route::post('/sanctum/token', function (Request $request) {
+Route::post('/sanctum/token', static function (Request $request) {
     $request->validate([
         'email' => 'required|email',
         'password' => 'required',
@@ -48,7 +37,7 @@ Route::post('/sanctum/token', function (Request $request) {
     return $user->createToken($request->device_name)->plainTextToken;
 });
 
-Route::post('/tokens/create', function (Request $request) {
+Route::post('/tokens/create', static function (Request $request) {
     $token = $request->user()->createToken($request->token_name);
 
     return ['token' => $token->plainTextToken];

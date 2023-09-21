@@ -18,6 +18,7 @@
         "bensampo/laravel-enum": "^6.6",
         "bezhansalleh/filament-exceptions": "^2.0",
         "bezhansalleh/filament-shield": "^3.0@beta",
+        "binarytorch/larecipe": "^2.6",
         "cheesegrits/filament-google-maps": "^3.0",
         "filament/filament": "^3.0",
         "filament/spatie-laravel-media-library-plugin": "3.0-stable",

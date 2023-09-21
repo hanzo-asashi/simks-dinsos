@@ -56,7 +56,7 @@ class AdminPanelProvider extends PanelProvider
             ->pages([
                 Pages\Dashboard::class,
             ])
-            ->globalSearchKeyBindings(['command+k', 'CTRL+K'])
+            ->globalSearchKeyBindings(['CTRL+K'])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->navigationGroups([
                 NavigationGroup::make()

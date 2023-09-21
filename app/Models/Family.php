@@ -4,7 +4,6 @@ namespace App\Models;
 
 use App\Enums\StatusAktifEnum;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use OwenIt\Auditing\Contracts\Auditable;
 
@@ -26,11 +25,6 @@ class Family extends Model implements Auditable
     protected $casts = [
         'status_kpm' => StatusAktifEnum::class,
     ];
-
-    public function family(): BelongsTo
-    {
-        return $this->belongsTo(Family::class);
-    }
 
     public function jenisBansos(): BelongsToMany
     {

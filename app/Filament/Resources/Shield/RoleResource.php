@@ -20,7 +20,7 @@ class RoleResource extends Resource implements HasShieldPermissions
 {
     protected static ?string $recordTitleAttribute = 'name';
 
-    protected static $permissionsCollection;
+    protected static Collection $permissionsCollection;
 
     public static function getPermissionPrefixes(): array
     {
@@ -84,7 +84,8 @@ class RoleResource extends Resource implements HasShieldPermissions
                                     ]),
                             ]),
                         Forms\Components\Tabs\Tab::make(__('filament-shield::filament-shield.pages'))
-                            ->visible(fn (): bool => (bool) Utils::isPageEntityEnabled() && count(FilamentShield::getPages()) > 0)
+                            ->visible(fn (
+                            ): bool => (bool) Utils::isPageEntityEnabled() && count(FilamentShield::getPages()) > 0)
                             ->reactive()
                             ->schema([
                                 Forms\Components\Grid::make([
@@ -98,7 +99,8 @@ class RoleResource extends Resource implements HasShieldPermissions
                                     ]),
                             ]),
                         Forms\Components\Tabs\Tab::make(__('filament-shield::filament-shield.widgets'))
-                            ->visible(fn (): bool => (bool) Utils::isWidgetEntityEnabled() && count(FilamentShield::getWidgets()) > 0)
+                            ->visible(fn (
+                            ): bool => (bool) Utils::isWidgetEntityEnabled() && count(FilamentShield::getWidgets()) > 0)
                             ->reactive()
                             ->schema([
                                 Forms\Components\Grid::make([
@@ -136,7 +138,11 @@ class RoleResource extends Resource implements HasShieldPermissions
     {
         collect(FilamentShield::getResources())->each(function ($entity) use ($set, $state) {
             $set($entity['resource'], $state);
-            collect(Utils::getResourcePermissionPrefixes($entity['fqcn']))->each(function ($permission) use ($entity, $set, $state) {
+            collect(Utils::getResourcePermissionPrefixes($entity['fqcn']))->each(function ($permission) use (
+                $entity,
+                $set,
+                $state
+            ) {
                 $set($permission . '_' . $entity['resource'], $state);
             });
         });
@@ -178,7 +184,10 @@ class RoleResource extends Resource implements HasShieldPermissions
     {
         $resourcePermissions = collect();
         collect(FilamentShield::getResources())->each(function ($entity) use ($resourcePermissions) {
-            collect(Utils::getResourcePermissionPrefixes($entity['fqcn']))->map(function ($permission) use ($resourcePermissions, $entity) {
+            collect(Utils::getResourcePermissionPrefixes($entity['fqcn']))->map(function ($permission) use (
+                $resourcePermissions,
+                $entity
+            ) {
                 $resourcePermissions->push((string) Str::of($permission . '_' . $entity['resource']));
             });
         });
@@ -212,7 +221,9 @@ class RoleResource extends Resource implements HasShieldPermissions
                         ->offIcon('heroicon-s-lock-closed')
                         ->reactive()
                         ->afterStateUpdated(function (Forms\Set $set, Forms\Get $get, $state) use ($entity) {
-                            collect(Utils::getResourcePermissionPrefixes($entity['fqcn']))->each(function ($permission) use ($set, $entity, $state) {
+                            collect(Utils::getResourcePermissionPrefixes($entity['fqcn']))->each(function (
+                                $permission
+                            ) use ($set, $entity, $state) {
                                 $set($permission . '_' . $entity['resource'], $state);
                             });
 
@@ -244,7 +255,10 @@ class RoleResource extends Resource implements HasShieldPermissions
         $entitiesStates = collect(FilamentShield::getResources())
             ->when(Utils::isPageEntityEnabled(), fn ($entities) => $entities->merge(FilamentShield::getPages()))
             ->when(Utils::isWidgetEntityEnabled(), fn ($entities) => $entities->merge(FilamentShield::getWidgets()))
-            ->when(Utils::isCustomPermissionEntityEnabled(), fn ($entities) => $entities->merge(static::getCustomEntities()))
+            ->when(
+                Utils::isCustomPermissionEntityEnabled(),
+                fn ($entities) => $entities->merge(static::getCustomEntities())
+            )
             ->map(function ($entity) use ($get) {
                 if (is_array($entity)) {
                     return (bool) $get($entity['resource']);
@@ -264,7 +278,11 @@ class RoleResource extends Resource implements HasShieldPermissions
 
     public static function getResourceEntityPermissionsSchema($entity): ?array
     {
-        return collect(Utils::getResourcePermissionPrefixes($entity['fqcn']))->reduce(function ($permissions/** @phpstan ignore-line */, $permission) use (
+        return collect(Utils::getResourcePermissionPrefixes($entity['fqcn']))->reduce(function (
+            $permissions
+/** @phpstan ignore-line */,
+            $permission
+        ) use (
             $entity
         ) {
             $permissions[] = Forms\Components\Checkbox::make($permission . '_' . $entity['resource'])
@@ -275,7 +293,10 @@ class RoleResource extends Resource implements HasShieldPermissions
                         return;
                     }
 
-                    $set($permission . '_' . $entity['resource'], $record->checkPermissionTo($permission . '_' . $entity['resource']));
+                    $set(
+                        $permission . '_' . $entity['resource'],
+                        $record->checkPermissionTo($permission . '_' . $entity['resource'])
+                    );
 
                     static::refreshResourceEntityStateAfterHydrated($record, $set, $entity);
 
@@ -299,8 +320,11 @@ class RoleResource extends Resource implements HasShieldPermissions
             ->toArray();
     }
 
-    protected static function refreshResourceEntityStateAfterHydrated(Model $record, Forms\Set $set, array $entity): void
-    {
+    protected static function refreshResourceEntityStateAfterHydrated(
+        Model $record,
+        Forms\Set $set,
+        array $entity
+    ): void {
         $entities = $record->permissions->pluck('name')
             ->reduce(function ($roles, $role) {
                 $roles[$role] = Str::afterLast($role, '_');
@@ -431,7 +455,9 @@ class RoleResource extends Resource implements HasShieldPermissions
                     Forms\Components\Checkbox::make($customPermission)
                         ->label(Str::of($customPermission)->headline())
                         ->inline()
-                        ->afterStateHydrated(function (Forms\Set $set, Forms\Get $get, $record) use ($customPermission) {
+                        ->afterStateHydrated(function (Forms\Set $set, Forms\Get $get, $record) use (
+                            $customPermission
+                        ) {
                             if (is_null($record)) {
                                 return;
                             }
